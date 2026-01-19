@@ -1,0 +1,48 @@
+{
+  "name": "sc-auth",
+  "private": true,
+  "workspaces": {
+    "packages": [
+      "apps/*",
+      "packages/*"
+    ],
+    "catalog": {
+      "dotenv": "^17.2.2",
+      "zod": "^4.1.13",
+      "typescript": "^5",
+      "@cloudflare/workers-types": "^4.20251213.0",
+      "better-auth": "^1.4.9",
+      "alchemy": "^0.82.1",
+      "wrangler": "^4.54.0",
+      "@libsql/client": "0.15.15",
+      "libsql": "0.5.22",
+      "@polar-sh/better-auth": "^1.6.4"
+    }
+  },
+  "type": "module",
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "check-types": "turbo check-types",
+    "dev:native": "turbo -F native dev",
+    "dev:web": "turbo -F web dev",
+    "dev:server": "turbo -F server dev",
+    "db:push": "turbo -F @sc-auth/db db:push",
+    "db:generate": "turbo -F @sc-auth/db db:generate",
+    "deploy": "turbo -F @sc-auth/infra deploy",
+    "destroy": "turbo -F @sc-auth/infra destroy"
+  },
+  "dependencies": {
+    "@sc-auth/env": "workspace:*",
+    "dotenv": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "catalog:",
+    "@sc-auth/config": "workspace:*",
+    "@types/node": "^22.13.14",
+    "turbo": "^2.6.3",
+    "typescript": "catalog:"
+  },
+  "packageManager": "bun@1.3.5"
+}

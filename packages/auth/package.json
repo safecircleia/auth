@@ -1,0 +1,26 @@
+{
+  "name": "@sc-auth/auth",
+  "type": "module",
+  "exports": {
+    ".": {
+      "default": "./src/index.ts"
+    },
+    "./*": {
+      "default": "./src/*.ts"
+    }
+  },
+  "scripts": {},
+  "dependencies": {
+    "@polar-sh/better-auth": "catalog:",
+    "@polar-sh/sdk": "^0.42.2",
+    "@sc-auth/db": "workspace:*",
+    "@sc-auth/env": "workspace:*",
+    "better-auth": "catalog:",
+    "dotenv": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@sc-auth/config": "workspace:*",
+    "typescript": "catalog:"
+  }
+}

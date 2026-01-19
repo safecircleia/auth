@@ -1,0 +1,3 @@
+{
+  "extends": "@sc-auth/config/tsconfig.base.json"
+}
