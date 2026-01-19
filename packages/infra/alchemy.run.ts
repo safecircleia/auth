@@ -24,6 +24,12 @@ export const web = await Nextjs("web", {
     BETTER_AUTH_URL: alchemy.env.BETTER_AUTH_URL!,
     POLAR_ACCESS_TOKEN: alchemy.secret.env.POLAR_ACCESS_TOKEN!,
     POLAR_SUCCESS_URL: alchemy.env.POLAR_SUCCESS_URL!,
+    TURNSTILE_SITE_KEY: alchemy.env.TURNSTILE_SITE_KEY!,
+  },
+  dev: {
+    env: {
+      port: "3003",
+    },
   },
 });
 
@@ -38,9 +44,10 @@ export const server = await Worker("server", {
     BETTER_AUTH_URL: alchemy.env.BETTER_AUTH_URL!,
     POLAR_ACCESS_TOKEN: alchemy.secret.env.POLAR_ACCESS_TOKEN!,
     POLAR_SUCCESS_URL: alchemy.env.POLAR_SUCCESS_URL!,
+    TURNSTILE_SECRET_KEY: alchemy.secret.env.TURNSTILE_SECRET_KEY!,
   },
   dev: {
-    port: 3000,
+    port: 3002
   },
 });
 

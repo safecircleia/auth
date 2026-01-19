@@ -1,5 +1,6 @@
 import { useForm } from "@tanstack/react-form";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { toast } from "sonner";
 import z from "zod";
 
@@ -9,10 +10,12 @@ import Loader from "./loader";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
+import { TurnstileWidget } from "./turnstile";
 
 export default function SignInForm({ onSwitchToSignUp }: { onSwitchToSignUp: () => void }) {
   const router = useRouter();
   const { isPending } = authClient.useSession();
+  const [turnstileToken, setTurnstileToken] = useState<string>("");
 
   const form = useForm({
     defaultValues: {
@@ -20,10 +23,20 @@ export default function SignInForm({ onSwitchToSignUp }: { onSwitchToSignUp: () 
       password: "",
     },
     onSubmit: async ({ value }) => {
+      if (!turnstileToken) {
+        toast.error("Please complete the CAPTCHA");
+        return;
+      }
+
       await authClient.signIn.email(
         {
           email: value.email,
           password: value.password,
+          fetchOptions: {
+            headers: {
+              "x-captcha-response": turnstileToken,
+            },
+          },
         },
         {
           onSuccess: () => {
@@ -32,6 +45,7 @@ export default function SignInForm({ onSwitchToSignUp }: { onSwitchToSignUp: () 
           },
           onError: (error) => {
             toast.error(error.error.message || error.error.statusText);
+            setTurnstileToken("");
           },
         },
       );
@@ -106,12 +120,23 @@ export default function SignInForm({ onSwitchToSignUp }: { onSwitchToSignUp: () 
           </form.Field>
         </div>
 
+        <div className="py-2">
+          <TurnstileWidget
+            onToken={setTurnstileToken}
+            onError={() => {
+              toast.error("CAPTCHA verification failed");
+              setTurnstileToken("");
+            }}
+            onExpire={() => setTurnstileToken("")}
+          />
+        </div>
+
         <form.Subscribe>
           {(state) => (
             <Button
               type="submit"
               className="w-full"
-              disabled={!state.canSubmit || state.isSubmitting}
+              disabled={!state.canSubmit || state.isSubmitting || !turnstileToken}
             >
               {state.isSubmitting ? "Submitting..." : "Sign In"}
             </Button>

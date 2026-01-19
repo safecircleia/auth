@@ -17,8 +17,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "sc-auth",
-  description: "sc-auth",
+  title: "SafeCircle Auth",
+  description: "SafeCircle Authentication",
 };
 
 export default function RootLayout({
