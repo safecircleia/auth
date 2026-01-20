@@ -1,3 +1,6 @@
+import { trpcServer } from "@hono/trpc-server";
+import { createContext } from "@sc-auth/api/context";
+import { appRouter } from "@sc-auth/api/routers/index";
 import { auth } from "@sc-auth/auth";
 import { env } from "@sc-auth/env/server";
 import { Hono } from "hono";
@@ -18,6 +21,16 @@ app.use(
 );
 
 app.on(["POST", "GET"], "/api/auth/*", (c) => auth.handler(c.req.raw));
+
+app.use(
+  "/trpc/*",
+  trpcServer({
+    router: appRouter,
+    createContext: (_opts, context) => {
+      return createContext({ context });
+    },
+  }),
+);
 
 app.get("/", (c) => {
   return c.text("OK");

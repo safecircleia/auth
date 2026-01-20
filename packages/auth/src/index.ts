@@ -19,6 +19,7 @@ import { deviceAuthorization } from "better-auth/plugins";
 import { captcha } from "better-auth/plugins";
 import { haveIBeenPwned } from "better-auth/plugins";
 import { lastLoginMethod } from "better-auth/plugins";
+import { expo } from "@better-auth/expo";
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
@@ -26,14 +27,10 @@ export const auth = betterAuth({
 
     schema: schema,
   }),
-  trustedOrigins: [env.CORS_ORIGIN],
-  disabledPaths: ["/token"],
+  trustedOrigins: [env.CORS_ORIGIN, "sc-auth://", "exp://"],
   appName: "SafeCircle",
   emailAndPassword: {
     enabled: true,
-    async sendResetPassword(data, request) {
-      // Send an email to the user with a link to reset their password
-    },
   },
   // uncomment cookieCache setting when ready to deploy to Cloudflare using *.workers.dev domains
   // session: {
@@ -42,8 +39,8 @@ export const auth = betterAuth({
   //     maxAge: 60,
   //   },
   // },
-  secret: env.BETTER_AUTH_SECRET || process.env.BETTER_AUTH_SECRET,
-  baseURL: env.BETTER_AUTH_URL,
+  // secret: env.BETTER_AUTH_SECRET,
+  // baseURL: env.BETTER_AUTH_URL,
   advanced: {
     defaultCookieAttributes: {
       sameSite: "none",
@@ -62,38 +59,52 @@ export const auth = betterAuth({
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     },
-
     github: {
       clientId: process.env.GITHUB_CLIENT_ID!,
       clientSecret: process.env.GITHUB_CLIENT_SECRET!,
     },
-
-    apple: {
-      clientId: process.env.APPLE_CLIENT_ID!,
-      clientSecret: process.env.APPLE_CLIENT_SECRET!,
-    },
-
-    twitter: {
-      clientId: process.env.TWITTER_CLIENT_ID!,
-      clientSecret: process.env.TWITTER_CLIENT_SECRET!,
-    },
-
     microsoft: {
       clientId: process.env.MICROSOFT_CLIENT_ID!,
       clientSecret: process.env.MICROSOFT_CLIENT_SECRET!,
     },
-
-    slack: {
-      clientId: process.env.SLACK_CLIENT_ID!,
-      clientSecret: process.env.SLACK_CLIENT_SECRET!,
+    tiktok: {
+      clientId: process.env.TIKTOK_CLIENT_ID!,
+      clientSecret: process.env.TIKTOK_CLIENT_SECRET!,
+    },
+    twitter: {
+      clientId: process.env.TWITTER_CLIENT_ID!,
+      clientSecret: process.env.TWITTER_CLIENT_SECRET!,
+    },
+    discord: {
+      clientId: process.env.DISCORD_CLIENT_ID!,
+      clientSecret: process.env.DISCORD_CLIENT_SECRET!,
     },
   },
   plugins: [
+    polar({
+      client: polarClient,
+      createCustomerOnSignUp: true,
+      enableCustomerPortal: true,
+      use: [
+        checkout({
+          products: [
+            {
+              productId: "your-product-id",
+              slug: "pro",
+            },
+          ],
+          successUrl: env.POLAR_SUCCESS_URL,
+          authenticatedUsersOnly: true,
+        }),
+        portal(),
+      ],
+    }),
+    expo(),
     lastLoginMethod(),
     haveIBeenPwned(),
     captcha({
       provider: "cloudflare-turnstile", // or google-recaptcha, hcaptcha, captchafox
-      secretKey: env.TURNSTILE_SECRET_KEY || process.env.TURNSTILE_SECRET_KEY!,
+      secretKey: env.TURNSTILE_SECRET_KEY,
     }),
     deviceAuthorization({
       verificationUri: "/device",
@@ -124,39 +135,5 @@ export const auth = betterAuth({
       },
     }),
     twoFactor(),
-    polar({
-      client: polarClient,
-      createCustomerOnSignUp: true,
-      enableCustomerPortal: true,
-      use: [
-        checkout({
-          products: [
-            {
-              productId: "your-product-id",
-              slug: "pro",
-            },
-          ],
-          successUrl: env.POLAR_SUCCESS_URL,
-          authenticatedUsersOnly: true,
-        }),
-        portal(),
-      ],
-    }),
-    jwt(),
-    oauthProvider({
-      loginPage: "/sign-in",
-      consentPage: "/consent",
-      signUp: {
-        page: "/sign-up",
-      },
-      // Optional: Add select account for multi-session support
-      // selectAccount: {
-      //   page: "/select-account",
-      // },
-      // Optional: Add post-login for organization selection
-      // postLogin: {
-      //   page: "/select-organization",
-      // },
-    }),
   ],
 });

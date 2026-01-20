@@ -10,9 +10,11 @@ import { apiKey } from "better-auth/plugins";
 import { organizationClient } from "better-auth/client/plugins";
 import { deviceAuthorizationClient } from "better-auth/client/plugins"; 
 import { lastLoginMethodClient } from "better-auth/client/plugins";
+import { oauthProviderClient } from "@better-auth/oauth-provider/client";
+import { oauthProviderResourceClient } from "@better-auth/oauth-provider/resource-client";
 
 export const authClient = createAuthClient({
-  baseURL: env.NEXT_PUBLIC_SERVER_URL,
+  baseURL: env.VITE_SERVER_URL,
   plugins: [
     polarClient(),
     twoFactorClient(),
@@ -24,5 +26,7 @@ export const authClient = createAuthClient({
     organizationClient(),
     deviceAuthorizationClient(),
     lastLoginMethodClient(),
+    oauthProviderClient(),
+    oauthProviderResourceClient(),
   ],
 });

@@ -1,5 +1,5 @@
 import { useForm } from "@tanstack/react-form";
-import { useRouter } from "next/navigation";
+import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
 import z from "zod";
@@ -7,15 +7,17 @@ import z from "zod";
 import { authClient } from "@/lib/auth-client";
 
 import Loader from "./loader";
+import { TurnstileWidget } from "./turnstile";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
-import { TurnstileWidget } from "./turnstile";
 
 export default function SignUpForm({ onSwitchToSignIn }: { onSwitchToSignIn: () => void }) {
-  const router = useRouter();
+  const navigate = useNavigate({
+    from: "/",
+  });
   const { isPending } = authClient.useSession();
-  const [turnstileToken, setTurnstileToken] = useState<string>("");
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
 
   const form = useForm({
     defaultValues: {
@@ -25,7 +27,7 @@ export default function SignUpForm({ onSwitchToSignIn }: { onSwitchToSignIn: () 
     },
     onSubmit: async ({ value }) => {
       if (!turnstileToken) {
-        toast.error("Please complete the CAPTCHA");
+        toast.error("Please complete the verification challenge");
         return;
       }
 
@@ -38,16 +40,16 @@ export default function SignUpForm({ onSwitchToSignIn }: { onSwitchToSignIn: () 
             headers: {
               "x-captcha-response": turnstileToken,
             },
-          },
-        },
-        {
-          onSuccess: () => {
-            router.push("/dashboard");
-            toast.success("Sign up successful");
-          },
-          onError: (error) => {
-            toast.error(error.error.message || error.error.statusText);
-            setTurnstileToken("");
+            onSuccess: () => {
+              navigate({
+                to: "/dashboard",
+              });
+              toast.success("Sign up successful");
+            },
+            onError: (error) => {
+              toast.error(error.error.message || error.error.statusText);
+              setTurnstileToken(null);
+            },
           },
         },
       );
@@ -145,14 +147,14 @@ export default function SignUpForm({ onSwitchToSignIn }: { onSwitchToSignIn: () 
           </form.Field>
         </div>
 
-        <div className="py-2">
+        <div>
           <TurnstileWidget
-            onToken={setTurnstileToken}
+            onToken={(token) => setTurnstileToken(token)}
+            onExpire={() => setTurnstileToken(null)}
             onError={() => {
-              toast.error("CAPTCHA verification failed");
-              setTurnstileToken("");
+              setTurnstileToken(null);
+              toast.error("Verification failed. Please try again.");
             }}
-            onExpire={() => setTurnstileToken("")}
           />
         </div>
 

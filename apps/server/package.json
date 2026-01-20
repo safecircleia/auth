@@ -8,21 +8,24 @@
     "compile": "bun build --compile --minify --sourcemap --bytecode ./src/index.ts --outfile server"
   },
   "dependencies": {
+    "@hono/trpc-server": "^0.4.0",
+    "@sc-auth/api": "workspace:*",
     "@sc-auth/auth": "workspace:*",
     "@sc-auth/db": "workspace:*",
     "@sc-auth/env": "workspace:*",
+    "@trpc/server": "catalog:",
     "better-auth": "catalog:",
     "dotenv": "catalog:",
-    "hono": "^4.8.2",
+    "hono": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "catalog:",
     "@sc-auth/config": "workspace:*",
-    "@types/node": "^22.13.14",
+    "@types/node": "catalog:",
     "alchemy": "catalog:",
     "tsdown": "^0.16.5",
     "typescript": "catalog:",
-    "wrangler": "catalog:"
+    "wrangler": "^4.54.0"
   }
 }

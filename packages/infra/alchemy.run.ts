@@ -1,12 +1,19 @@
 import alchemy from "alchemy";
-import { Nextjs } from "alchemy/cloudflare";
+import { Vite } from "alchemy/cloudflare";
 import { Worker } from "alchemy/cloudflare";
 import { D1Database } from "alchemy/cloudflare";
 import { config } from "dotenv";
 
-config({ path: "./.env" });
-config({ path: "../../apps/web/.env" });
-config({ path: "../../apps/server/.env" });
+const stage = process.env.ALCHEMY_STAGE || "dev";
+
+if (stage === "prod") {
+  config({ path: "../../apps/server/.env.production" });
+  config({ path: "../../apps/web/.env.production" });
+} else {
+  config({ path: "./.env" });
+  config({ path: "../../apps/web/.env" });
+  config({ path: "../../apps/server/.env" });
+}
 
 const app = await alchemy("sc-auth");
 
@@ -14,22 +21,11 @@ const db = await D1Database("database", {
   migrationsDir: "../../packages/db/src/migrations",
 });
 
-export const web = await Nextjs("web", {
+export const web = await Vite("web", {
   cwd: "../../apps/web",
+  assets: "dist",
   bindings: {
-    NEXT_PUBLIC_SERVER_URL: alchemy.env.NEXT_PUBLIC_SERVER_URL!,
-    DB: db,
-    CORS_ORIGIN: alchemy.env.CORS_ORIGIN!,
-    BETTER_AUTH_SECRET: alchemy.secret.env.BETTER_AUTH_SECRET!,
-    BETTER_AUTH_URL: alchemy.env.BETTER_AUTH_URL!,
-    POLAR_ACCESS_TOKEN: alchemy.secret.env.POLAR_ACCESS_TOKEN!,
-    POLAR_SUCCESS_URL: alchemy.env.POLAR_SUCCESS_URL!,
-    TURNSTILE_SITE_KEY: alchemy.env.TURNSTILE_SITE_KEY!,
-  },
-  dev: {
-    env: {
-      port: "3003",
-    },
+    VITE_SERVER_URL: alchemy.env.VITE_SERVER_URL!,
   },
 });
 
@@ -47,7 +43,7 @@ export const server = await Worker("server", {
     TURNSTILE_SECRET_KEY: alchemy.secret.env.TURNSTILE_SECRET_KEY!,
   },
   dev: {
-    port: 3002
+    port: 3000,
   },
 });
 
