@@ -4,7 +4,7 @@ import { Worker } from "alchemy/cloudflare";
 import { D1Database } from "alchemy/cloudflare";
 import { config } from "dotenv";
 
-const stage = process.env.ALCHEMY_STAGE || "prod";
+const stage = process.env.ALCHEMY_STAGE || "dev";
 
 if (stage === "prod") {
   config({ path: "./.env.production" });

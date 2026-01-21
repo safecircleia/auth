@@ -39,13 +39,12 @@ export const auth = betterAuth({
   //     maxAge: 60,
   //   },
   // },
-  // secret: env.BETTER_AUTH_SECRET,
-  // baseURL: env.BETTER_AUTH_URL,
+  secret: env.BETTER_AUTH_SECRET,
+  baseURL: env.BETTER_AUTH_URL,
   advanced: {
     defaultCookieAttributes: {
-      // Use non-secure/lax locally so cookies work on http://localhost; secure/none in prod.
-      sameSite: env.CORS_ORIGIN.startsWith("http://localhost") ? "lax" : "none",
-      secure: !env.CORS_ORIGIN.startsWith("http://localhost"),
+      sameSite: "none",
+      secure: true,
       httpOnly: true,
     },
     // uncomment crossSubDomainCookies setting when ready to deploy and replace <your-workers-subdomain> with your actual workers subdomain
