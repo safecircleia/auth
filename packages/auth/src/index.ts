@@ -43,8 +43,9 @@ export const auth = betterAuth({
   // baseURL: env.BETTER_AUTH_URL,
   advanced: {
     defaultCookieAttributes: {
-      sameSite: "none",
-      secure: true,
+      // Use non-secure/lax locally so cookies work on http://localhost; secure/none in prod.
+      sameSite: env.CORS_ORIGIN.startsWith("http://localhost") ? "lax" : "none",
+      secure: !env.CORS_ORIGIN.startsWith("http://localhost"),
       httpOnly: true,
     },
     // uncomment crossSubDomainCookies setting when ready to deploy and replace <your-workers-subdomain> with your actual workers subdomain

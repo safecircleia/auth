@@ -9,11 +9,17 @@ export const Route = createFileRoute("/login")({
 });
 
 function RouteComponent() {
-  const [showSignIn, setShowSignIn] = useState(false);
+  // Keep both forms mounted so the Turnstile widget isn't destroyed when toggling tabs.
+  const [activeTab, setActiveTab] = useState<"signin" | "signup">("signup");
 
-  return showSignIn ? (
-    <SignInForm onSwitchToSignUp={() => setShowSignIn(false)} />
-  ) : (
-    <SignUpForm onSwitchToSignIn={() => setShowSignIn(true)} />
+  return (
+    <div>
+      <div className={activeTab === "signin" ? "block" : "hidden"}>
+        <SignInForm onSwitchToSignUp={() => setActiveTab("signup")} />
+      </div>
+      <div className={activeTab === "signup" ? "block" : "hidden"}>
+        <SignUpForm onSwitchToSignIn={() => setActiveTab("signin")} />
+      </div>
+    </div>
   );
 }

@@ -54,7 +54,7 @@ export default function SignInForm({ onSwitchToSignUp }: { onSwitchToSignUp: () 
     },
     validators: {
       onSubmit: z.object({
-        email: z.email("Invalid email address"),
+        email: z.string().email("Invalid email address"),
         password: z.string().min(8, "Password must be at least 8 characters"),
       }),
     },
@@ -124,6 +124,7 @@ export default function SignInForm({ onSwitchToSignUp }: { onSwitchToSignUp: () 
 
         <div>
           <TurnstileWidget
+            key="signin-turnstile"
             onToken={(token) => setTurnstileToken(token)}
             onExpire={() => setTurnstileToken(null)}
             onError={() => {
