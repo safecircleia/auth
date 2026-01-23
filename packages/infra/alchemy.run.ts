@@ -4,7 +4,7 @@ import { Worker } from "alchemy/cloudflare";
 import { D1Database } from "alchemy/cloudflare";
 import { config } from "dotenv";
 
-const stage = process.env.ALCHEMY_STAGE || "dev";
+const stage = process.env.ALCHEMY_STAGE || "prod";
 
 if (stage === "prod") {
   config({ path: "./.env.production" });
@@ -41,7 +41,6 @@ export const server = await Worker("server", {
     BETTER_AUTH_URL: alchemy.env.BETTER_AUTH_URL!,
     POLAR_ACCESS_TOKEN: alchemy.secret.env.POLAR_ACCESS_TOKEN!,
     POLAR_SUCCESS_URL: alchemy.env.POLAR_SUCCESS_URL!,
-    TURNSTILE_SECRET_KEY: alchemy.secret.env.TURNSTILE_SECRET_KEY!,
   },
   dev: {
     port: 3000,

@@ -1,13 +1,11 @@
 import { useForm } from "@tanstack/react-form";
 import { useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
 import { toast } from "sonner";
 import z from "zod";
 
 import { authClient } from "@/lib/auth-client";
 
 import Loader from "./loader";
-import { TurnstileWidget } from "./turnstile";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
@@ -17,7 +15,6 @@ export default function SignInForm({ onSwitchToSignUp }: { onSwitchToSignUp: () 
     from: "/",
   });
   const { isPending } = authClient.useSession();
-  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
 
   const form = useForm({
     defaultValues: {
@@ -25,19 +22,11 @@ export default function SignInForm({ onSwitchToSignUp }: { onSwitchToSignUp: () 
       password: "",
     },
     onSubmit: async ({ value }) => {
-      if (!turnstileToken) {
-        toast.error("Please complete the verification challenge");
-        return;
-      }
-
       await authClient.signIn.email(
         {
           email: value.email,
           password: value.password,
           fetchOptions: {
-            headers: {
-              "x-captcha-response": turnstileToken,
-            },
             onSuccess: () => {
               navigate({
                 to: "/dashboard",
@@ -46,7 +35,6 @@ export default function SignInForm({ onSwitchToSignUp }: { onSwitchToSignUp: () 
             },
             onError: (error) => {
               toast.error(error.error.message || error.error.statusText);
-              setTurnstileToken(null);
             },
           },
         },
@@ -122,24 +110,12 @@ export default function SignInForm({ onSwitchToSignUp }: { onSwitchToSignUp: () 
           </form.Field>
         </div>
 
-        <div>
-          <TurnstileWidget
-            key="signin-turnstile"
-            onToken={(token) => setTurnstileToken(token)}
-            onExpire={() => setTurnstileToken(null)}
-            onError={() => {
-              setTurnstileToken(null);
-              toast.error("Verification failed. Please try again.");
-            }}
-          />
-        </div>
-
         <form.Subscribe>
           {(state) => (
             <Button
               type="submit"
               className="w-full"
-              disabled={!state.canSubmit || state.isSubmitting || !turnstileToken}
+              disabled={!state.canSubmit || state.isSubmitting}
             >
               {state.isSubmitting ? "Submitting..." : "Sign In"}
             </Button>

@@ -42,7 +42,6 @@
     "@better-auth/passkey": "^1.4.16",
     "@sc-auth/env": "workspace:*",
     "dotenv": "catalog:",
-    "react-turnstile": "^1.1.4",
     "zod": "catalog:"
   },
   "devDependencies": {

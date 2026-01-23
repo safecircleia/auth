@@ -16,7 +16,6 @@ import { admin } from "better-auth/plugins";
 import { apiKey } from "better-auth/plugins";
 import { organization } from "better-auth/plugins";
 import { deviceAuthorization } from "better-auth/plugins";
-import { captcha } from "better-auth/plugins";
 import { haveIBeenPwned } from "better-auth/plugins";
 import { lastLoginMethod } from "better-auth/plugins";
 import { expo } from "@better-auth/expo";
@@ -39,6 +38,8 @@ export const auth = betterAuth({
   //     maxAge: 60,
   //   },
   // },
+  // secret: 'dasdasda',
+  // baseURL: 'http://localhost:3000',
   secret: env.BETTER_AUTH_SECRET,
   baseURL: env.BETTER_AUTH_URL,
   advanced: {
@@ -93,7 +94,7 @@ export const auth = betterAuth({
               slug: "pro",
             },
           ],
-          successUrl: env.POLAR_SUCCESS_URL,
+          // successUrl: env.POLAR_SUCCESS_URL,
           authenticatedUsersOnly: true,
         }),
         portal(),
@@ -102,10 +103,6 @@ export const auth = betterAuth({
     expo(),
     lastLoginMethod(),
     haveIBeenPwned(),
-    captcha({
-      provider: "cloudflare-turnstile", // or google-recaptcha, hcaptcha, captchafox
-      secretKey: env.TURNSTILE_SECRET_KEY,
-    }),
     deviceAuthorization({
       verificationUri: "/device",
     }),
@@ -135,5 +132,10 @@ export const auth = betterAuth({
       },
     }),
     twoFactor(),
+    jwt(),
+    oauthProvider({
+      loginPage: "/sign-in",
+      consentPage: "/consent",
+    })
   ],
 });
