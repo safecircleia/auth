@@ -1,5 +1,5 @@
 import alchemy from "alchemy";
-import { Vite } from "alchemy/cloudflare";
+import { Nextjs } from "alchemy/cloudflare";
 import { Worker } from "alchemy/cloudflare";
 import { D1Database } from "alchemy/cloudflare";
 import { config } from "dotenv";
@@ -22,11 +22,11 @@ const db = await D1Database("database", {
   migrationsDir: "../../packages/db/src/migrations",
 });
 
-export const web = await Vite("web", {
+export const web = await Nextjs("web", {
   cwd: "../../apps/web",
   assets: "dist",
   bindings: {
-    VITE_SERVER_URL: alchemy.env.VITE_SERVER_URL!,
+    NEXT_PUBLIC_SERVER_URL: alchemy.env.NEXT_PUBLIC_SERVER_URL!,
   },
 });
 

@@ -2,10 +2,10 @@
   "expo": {
     "name": "sc-auth",
     "slug": "sc-auth",
-    "version": "0.0.1",
+    "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "scauth",
+    "scheme": "mybettertapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
@@ -19,8 +19,8 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": true,
-      "package": "com.safecircle.auth"
+      "predictiveBackGestureEnabled": false,
+      "package": "com.anonymous.mybettertapp"
     },
     "web": {
       "output": "static",

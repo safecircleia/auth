@@ -38,8 +38,8 @@ export const auth = betterAuth({
   //     maxAge: 60,
   //   },
   // },
-  // secret: 'dasdasda',
-  // baseURL: 'http://localhost:3000',
+  // secret: "dasdasda", // Use this to generate DB schema
+  // baseURL: "http://localhost:3000",
   secret: env.BETTER_AUTH_SECRET,
   baseURL: env.BETTER_AUTH_URL,
   advanced: {
@@ -136,6 +136,6 @@ export const auth = betterAuth({
     oauthProvider({
       loginPage: "/sign-in",
       consentPage: "/consent",
-    })
+    }),
   ],
 });

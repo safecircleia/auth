@@ -22,10 +22,10 @@
   "devDependencies": {
     "@cloudflare/workers-types": "catalog:",
     "@sc-auth/config": "workspace:*",
-    "@types/node": "catalog:",
+    "@types/node": "^22.13.14",
     "alchemy": "catalog:",
     "tsdown": "^0.16.5",
     "typescript": "catalog:",
-    "wrangler": "^4.54.0"
+    "wrangler": "catalog:"
   }
 }

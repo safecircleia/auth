@@ -1,5 +1,5 @@
 import { useForm } from "@tanstack/react-form";
-import { useNavigate } from "@tanstack/react-router";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import z from "zod";
 
@@ -11,9 +11,7 @@ import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 
 export default function SignInForm({ onSwitchToSignUp }: { onSwitchToSignUp: () => void }) {
-  const navigate = useNavigate({
-    from: "/",
-  });
+  const router = useRouter();
   const { isPending } = authClient.useSession();
 
   const form = useForm({
@@ -26,23 +24,21 @@ export default function SignInForm({ onSwitchToSignUp }: { onSwitchToSignUp: () 
         {
           email: value.email,
           password: value.password,
-          fetchOptions: {
-            onSuccess: () => {
-              navigate({
-                to: "/dashboard",
-              });
-              toast.success("Sign in successful");
-            },
-            onError: (error) => {
-              toast.error(error.error.message || error.error.statusText);
-            },
+        },
+        {
+          onSuccess: () => {
+            router.push("/dashboard");
+            toast.success("Sign in successful");
+          },
+          onError: (error) => {
+            toast.error(error.error.message || error.error.statusText);
           },
         },
       );
     },
     validators: {
       onSubmit: z.object({
-        email: z.string().email("Invalid email address"),
+        email: z.email("Invalid email address"),
         password: z.string().min(8, "Password must be at least 8 characters"),
       }),
     },

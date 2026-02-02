@@ -9,14 +9,14 @@
     "./native": "./src/native.ts"
   },
   "dependencies": {
-    "@t3-oss/env-core": "^0.13.1",
+    "@t3-oss/env-nextjs": "^0.13.1",
     "dotenv": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {
     "@sc-auth/config": "workspace:*",
     "@sc-auth/infra": "workspace:*",
-    "@types/node": "catalog:",
+    "@types/node": "^22.13.14",
     "typescript": "catalog:"
   }
 }
