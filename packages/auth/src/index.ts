@@ -55,32 +55,32 @@ export const auth = betterAuth({
     //   domain: "<your-workers-subdomain>",
     // },
   },
-  socialProviders: {
-    google: {
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-    },
-    github: {
-      clientId: process.env.GITHUB_CLIENT_ID!,
-      clientSecret: process.env.GITHUB_CLIENT_SECRET!,
-    },
-    microsoft: {
-      clientId: process.env.MICROSOFT_CLIENT_ID!,
-      clientSecret: process.env.MICROSOFT_CLIENT_SECRET!,
-    },
-    tiktok: {
-      clientId: process.env.TIKTOK_CLIENT_ID!,
-      clientSecret: process.env.TIKTOK_CLIENT_SECRET!,
-    },
-    twitter: {
-      clientId: process.env.TWITTER_CLIENT_ID!,
-      clientSecret: process.env.TWITTER_CLIENT_SECRET!,
-    },
-    discord: {
-      clientId: process.env.DISCORD_CLIENT_ID!,
-      clientSecret: process.env.DISCORD_CLIENT_SECRET!,
-    },
-  },
+  // socialProviders: {
+  //   google: {
+  //     clientId: process.env.GOOGLE_CLIENT_ID!,
+  //     clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+  //   },
+  //   github: {
+  //     clientId: process.env.GITHUB_CLIENT_ID!,
+  //     clientSecret: process.env.GITHUB_CLIENT_SECRET!,
+  //   },
+  //   microsoft: {
+  //     clientId: process.env.MICROSOFT_CLIENT_ID!,
+  //     clientSecret: process.env.MICROSOFT_CLIENT_SECRET!,
+  //   },
+  //   tiktok: {
+  //     clientId: process.env.TIKTOK_CLIENT_ID!,
+  //     clientSecret: process.env.TIKTOK_CLIENT_SECRET!,
+  //   },
+  //   twitter: {
+  //     clientId: process.env.TWITTER_CLIENT_ID!,
+  //     clientSecret: process.env.TWITTER_CLIENT_SECRET!,
+  //   },
+  //   discord: {
+  //     clientId: process.env.DISCORD_CLIENT_ID!,
+  //     clientSecret: process.env.DISCORD_CLIENT_SECRET!,
+  //   },
+  // },
   plugins: [
     polar({
       client: polarClient,

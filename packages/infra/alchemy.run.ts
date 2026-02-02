@@ -2,6 +2,8 @@ import alchemy from "alchemy";
 import { Nextjs } from "alchemy/cloudflare";
 import { Worker } from "alchemy/cloudflare";
 import { D1Database } from "alchemy/cloudflare";
+import { CloudflareStateStore } from "alchemy/state";
+// import { GitHubComment } from "alchemy/github";
 import { config } from "dotenv";
 
 const stage = process.env.ALCHEMY_STAGE || "dev";
@@ -16,21 +18,28 @@ if (stage === "prod") {
   config({ path: "../../apps/server/.env" });
 }
 
-const app = await alchemy("sc-auth");
+const app = await alchemy("sc-auth", {
+  stateStore: (scope) =>
+    new CloudflareStateStore(scope, {
+      scriptName: "sc-auth-state-store",
+    }),
+});
 
 const db = await D1Database("database", {
+  name: "sc-auth",
   migrationsDir: "../../packages/db/src/migrations",
 });
 
 export const web = await Nextjs("web", {
+  name: "sc-auth-frontend",
   cwd: "../../apps/web",
-  assets: "dist",
   bindings: {
     NEXT_PUBLIC_SERVER_URL: alchemy.env.NEXT_PUBLIC_SERVER_URL!,
   },
 });
 
 export const server = await Worker("server", {
+  name: "sc-auth-backend",
   cwd: "../../apps/server",
   entrypoint: "src/index.ts",
   compatibility: "node",
@@ -49,5 +58,25 @@ export const server = await Worker("server", {
 
 console.log(`Web    -> ${web.url}`);
 console.log(`Server -> ${server.url}`);
+
+// if (process.env.PULL_REQUEST) {
+//   // if this is a PR, add a comment to the PR with the preview URL
+//   // it will auto-update with each push
+//   await GitHubComment("preview-comment", {
+//     owner: "safecircleia",
+//     repository: "auth",
+//     issueNumber: Number(process.env.PULL_REQUEST),
+//     body: `## 🚀 Preview Deployed
+
+// Your changes have been deployed to a preview environment:
+
+// **🌐 Website:** ${web.url}
+
+// Built from commit ${process.env.GITHUB_SHA?.slice(0, 7)}
+
+// ---
+// <sub>🤖 This comment updates automatically with each push.</sub>`,
+//   });
+// }
 
 await app.finalize();
