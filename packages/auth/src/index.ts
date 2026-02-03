@@ -23,7 +23,6 @@ import { expo } from "@better-auth/expo";
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
     provider: "sqlite",
-
     schema: schema,
   }),
   trustedOrigins: [env.CORS_ORIGIN, "sc-auth://", "exp://"],

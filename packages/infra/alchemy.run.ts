@@ -28,13 +28,20 @@ const app = await alchemy("sc-auth", {
 const db = await D1Database("database", {
   name: "sc-auth",
   migrationsDir: "../../packages/db/src/migrations",
+  adopt: true,
 });
 
 export const web = await Nextjs("web", {
+  adopt: true,
   name: "sc-auth-frontend",
   cwd: "../../apps/web",
   bindings: {
     NEXT_PUBLIC_SERVER_URL: alchemy.env.NEXT_PUBLIC_SERVER_URL!,
+  },
+  dev: {
+    env: {
+      PORT: "3001",
+    },
   },
 });
 

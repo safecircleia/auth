@@ -18,7 +18,7 @@
       "hono": "^4.8.2",
       "@trpc/server": "^11.7.2",
       "better-auth": "^1.4.18",
-      "alchemy": "^0.82.1",
+      "alchemy": "https://pkg.pr.new/alchemy-run/alchemy@1313",
       "wrangler": "^4.54.0",
       "@libsql/client": "0.15.15",
       "libsql": "0.5.22",
@@ -45,6 +45,7 @@
     "@better-auth/oauth-provider": "^1.4.18",
     "@better-auth/passkey": "^1.4.18",
     "@sc-auth/env": "workspace:*",
+    "alchemy": "https://pkg.pr.new/alchemy-run/alchemy@1313",
     "dotenv": "catalog:",
     "zod": "catalog:"
   },
