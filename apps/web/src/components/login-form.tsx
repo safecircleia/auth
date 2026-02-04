@@ -4,6 +4,7 @@ import { useForm } from "@tanstack/react-form";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import z from "zod";
+import { useEffect, useState } from "react";
 
 import { cn } from "@/lib/utils";
 import { authClient } from "@/lib/auth-client";
@@ -17,12 +18,20 @@ import {
   FieldSeparator,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import { OAuthProviders } from "./oauth-providers";
 import Loader from "./loader";
 
 export function LoginForm({ className }: { className?: string }) {
   const router = useRouter();
   const { isPending } = authClient.useSession();
+  const [lastMethod, setLastMethod] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Get the last used login method
+    const method = authClient.getLastUsedLoginMethod();
+    setLastMethod(method);
+  }, []);
 
   const form = useForm({
     defaultValues: {
@@ -61,6 +70,8 @@ export function LoginForm({ className }: { className?: string }) {
       </div>
     );
   }
+
+  const isEmailLastMethod = lastMethod === "email";
 
   return (
     <form
@@ -129,10 +140,16 @@ export function LoginForm({ className }: { className?: string }) {
             {(state) => (
               <Button
                 type="submit"
-                className="w-full"
+                className="w-full relative"
+                variant={isEmailLastMethod ? "default" : "outline"}
                 disabled={!state.canSubmit || state.isSubmitting}
               >
                 {state.isSubmitting ? "Signing in..." : "Login"}
+                {isEmailLastMethod && (
+                  <Badge variant="secondary" className="ml-2 text-xs">
+                    Last used
+                  </Badge>
+                )}
               </Button>
             )}
           </form.Subscribe>
@@ -140,7 +157,7 @@ export function LoginForm({ className }: { className?: string }) {
 
         <FieldSeparator>Or continue with</FieldSeparator>
 
-        <OAuthProviders mode="login" />
+        <OAuthProviders mode="login" lastMethod={lastMethod} />
 
         <FieldDescription className="text-center">
           Don&apos;t have an account?{" "}

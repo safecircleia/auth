@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useForm } from "@tanstack/react-form";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -17,12 +18,20 @@ import {
   FieldSeparator,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { InputOTP } from "@/components/ui/input-otp";
 import { OAuthProviders } from "./oauth-providers";
 import Loader from "./loader";
+
+type SignupStep = "form" | "verify";
 
 export function SignupForm({ className }: { className?: string }) {
   const router = useRouter();
   const { isPending } = authClient.useSession();
+  const [step, setStep] = useState<SignupStep>("form");
+  const [email, setEmail] = useState("");
+  const [otp, setOtp] = useState("");
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [isResending, setIsResending] = useState(false);
 
   const form = useForm({
     defaultValues: {
@@ -45,8 +54,9 @@ export function SignupForm({ className }: { className?: string }) {
         },
         {
           onSuccess: () => {
-            router.push("/dashboard");
-            toast.success("Account created successfully");
+            setEmail(value.email);
+            setStep("verify");
+            toast.success("Account created! Please verify your email.");
           },
           onError: (error) => {
             toast.error(error.error.message || error.error.statusText);
@@ -66,10 +76,126 @@ export function SignupForm({ className }: { className?: string }) {
     },
   });
 
+  const handleVerifyOTP = async () => {
+    if (otp.length !== 6) {
+      toast.error("Please enter the complete verification code");
+      return;
+    }
+
+    setIsVerifying(true);
+    try {
+      const { error } = await authClient.emailOtp.verifyEmail({
+        email,
+        otp,
+      });
+
+      if (error) {
+        toast.error(error.message || "Invalid verification code");
+        setOtp("");
+      } else {
+        toast.success("Email verified successfully!");
+        router.push("/dashboard");
+      }
+    } catch (err) {
+      toast.error("Failed to verify email. Please try again.");
+      setOtp("");
+    } finally {
+      setIsVerifying(false);
+    }
+  };
+
+  const handleResendOTP = async () => {
+    setIsResending(true);
+    try {
+      const { error } = await authClient.emailOtp.sendVerificationOtp({
+        email,
+        type: "email-verification",
+      });
+
+      if (error) {
+        toast.error(error.message || "Failed to resend code");
+      } else {
+        toast.success("Verification code sent!");
+        setOtp("");
+      }
+    } catch (err) {
+      toast.error("Failed to resend code. Please try again.");
+    } finally {
+      setIsResending(false);
+    }
+  };
+
   if (isPending) {
     return (
       <div className="flex items-center justify-center">
         <Loader />
+      </div>
+    );
+  }
+
+  if (step === "verify") {
+    return (
+      <div className={cn("flex flex-col gap-6", className)}>
+        <FieldGroup>
+          <div className="flex flex-col items-center gap-1 text-center">
+            <h1 className="text-2xl font-bold">Verify your email</h1>
+            <p className="text-muted-foreground text-sm text-balance">
+              We sent a verification code to{" "}
+              <span className="font-medium text-foreground">{email}</span>
+            </p>
+          </div>
+
+          <Field>
+            <FieldLabel className="sr-only">Verification Code</FieldLabel>
+            <InputOTP
+              length={6}
+              value={otp}
+              onChange={setOtp}
+              onComplete={handleVerifyOTP}
+              disabled={isVerifying}
+              autoFocus
+            />
+            <FieldDescription className="text-center mt-2">
+              Enter the 6-digit code from your email
+            </FieldDescription>
+          </Field>
+
+          <Field>
+            <Button
+              type="button"
+              className="w-full"
+              onClick={handleVerifyOTP}
+              disabled={otp.length !== 6 || isVerifying}
+            >
+              {isVerifying ? "Verifying..." : "Verify Email"}
+            </Button>
+          </Field>
+
+          <FieldDescription className="text-center">
+            Didn&apos;t receive the code?{" "}
+            <button
+              type="button"
+              onClick={handleResendOTP}
+              disabled={isResending}
+              className="underline underline-offset-4 hover:text-primary disabled:opacity-50"
+            >
+              {isResending ? "Sending..." : "Resend code"}
+            </button>
+          </FieldDescription>
+
+          <FieldDescription className="text-center">
+            <button
+              type="button"
+              onClick={() => {
+                setStep("form");
+                setOtp("");
+              }}
+              className="underline underline-offset-4 hover:text-primary"
+            >
+              ← Back to signup
+            </button>
+          </FieldDescription>
+        </FieldGroup>
       </div>
     );
   }

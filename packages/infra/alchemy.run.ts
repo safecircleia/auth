@@ -6,7 +6,7 @@ import { CloudflareStateStore } from "alchemy/state";
 // import { GitHubComment } from "alchemy/github";
 import { config } from "dotenv";
 
-const stage = process.env.ALCHEMY_STAGE || "dev";
+const stage = process.env.ALCHEMY_STAGE || "prod";
 
 if (stage === "prod") {
   config({ path: "./.env.production" });
@@ -57,6 +57,7 @@ export const server = await Worker("server", {
     BETTER_AUTH_URL: alchemy.env.BETTER_AUTH_URL!,
     POLAR_ACCESS_TOKEN: alchemy.secret.env.POLAR_ACCESS_TOKEN!,
     POLAR_SUCCESS_URL: alchemy.env.POLAR_SUCCESS_URL!,
+    RESEND_API_KEY: alchemy.secret.env.RESEND_API_KEY!,
   },
   dev: {
     port: 3000,

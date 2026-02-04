@@ -7,6 +7,7 @@ import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { jwt } from "better-auth/plugins";
 import { oauthProvider } from "@better-auth/oauth-provider";
 import { polarClient } from "./lib/payments";
+import { sendOTPEmail } from "./lib/email";
 import { twoFactor } from "better-auth/plugins";
 import { phoneNumber } from "better-auth/plugins";
 import { magicLink } from "better-auth/plugins";
@@ -25,7 +26,17 @@ export const auth = betterAuth({
     provider: "sqlite",
     schema: schema,
   }),
-  trustedOrigins: [env.CORS_ORIGIN, "sc-auth://", "exp://"],
+  trustedOrigins: [
+    env.CORS_ORIGIN,
+
+    // Expo URLs
+    "sc-auth://",
+    "sc-companion://",
+
+    ...(process.env.NODE_ENV === "development"
+      ? ["exp://", "exp://**", "exp://192.168.*.*:*/**"]
+      : []),
+  ],
   appName: "SafeCircle",
   emailAndPassword: {
     enabled: true,
@@ -93,7 +104,7 @@ export const auth = betterAuth({
               slug: "pro",
             },
           ],
-          // successUrl: env.POLAR_SUCCESS_URL,
+          successUrl: env.POLAR_SUCCESS_URL,
           authenticatedUsersOnly: true,
         }),
         portal(),
@@ -110,14 +121,9 @@ export const auth = betterAuth({
     admin(),
     passkey(),
     emailOTP({
+      sendVerificationOnSignUp: true,
       async sendVerificationOTP({ email, otp, type }) {
-        if (type === "sign-in") {
-          // Send the OTP for sign in
-        } else if (type === "email-verification") {
-          // Send the OTP for email verification
-        } else {
-          // Send the OTP for password reset
-        }
+        await sendOTPEmail({ to: email, otp, type });
       },
     }),
     magicLink({
