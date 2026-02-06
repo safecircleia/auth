@@ -6,7 +6,7 @@ import { CloudflareStateStore } from "alchemy/state";
 // import { GitHubComment } from "alchemy/github";
 import { config } from "dotenv";
 
-const stage = process.env.ALCHEMY_STAGE || "prod";
+const stage = process.env.ALCHEMY_STAGE || "dev";
 
 if (stage === "prod") {
   config({ path: "./.env.production" });
@@ -58,6 +58,16 @@ export const server = await Worker("server", {
     POLAR_ACCESS_TOKEN: alchemy.secret.env.POLAR_ACCESS_TOKEN!,
     POLAR_SUCCESS_URL: alchemy.env.POLAR_SUCCESS_URL!,
     RESEND_API_KEY: alchemy.secret.env.RESEND_API_KEY!,
+    GOOGLE_CLIENT_ID: alchemy.secret.env.GOOGLE_CLIENT_ID!,
+    GOOGLE_CLIENT_SECRET: alchemy.secret.env.GOOGLE_CLIENT_SECRET!,
+    GITHUB_CLIENT_ID: alchemy.secret.env.GITHUB_CLIENT_ID!,
+    GITHUB_CLIENT_SECRET: alchemy.secret.env.GITHUB_CLIENT_SECRET!,
+    MICROSOFT_CLIENT_ID: alchemy.secret.env.MICROSOFT_CLIENT_ID!,
+    MICROSOFT_CLIENT_SECRET: alchemy.secret.env.MICROSOFT_CLIENT_SECRET!,
+    TWITTER_CLIENT_ID: alchemy.secret.env.TWITTER_CLIENT_ID!,
+    TWITTER_CLIENT_SECRET: alchemy.secret.env.TWITTER_CLIENT_SECRET!,
+    DISCORD_CLIENT_ID: alchemy.secret.env.DISCORD_CLIENT_ID!,
+    DISCORD_CLIENT_SECRET: alchemy.secret.env.DISCORD_CLIENT_SECRET!,
   },
   dev: {
     port: 3000,

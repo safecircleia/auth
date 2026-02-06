@@ -53,6 +53,7 @@
     "@cloudflare/workers-types": "catalog:",
     "@sc-auth/config": "workspace:*",
     "@types/node": "^22.13.14",
+    "shadcn": "^3.8.4",
     "turbo": "^2.6.3",
     "typescript": "catalog:"
   },

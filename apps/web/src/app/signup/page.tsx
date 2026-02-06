@@ -1,6 +1,8 @@
 import { Logo } from "@/components/logo";
 import { SignupForm } from "../../components/signup-form";
 
+const APP_VERSION = "0.1.0";
+
 export default function SignupPage() {
   return (
     <div className="grid min-h-svh lg:grid-cols-2">
@@ -16,6 +18,9 @@ export default function SignupPage() {
             <SignupForm />
           </div>
         </div>
+        <p className="text-muted-foreground/60 text-center text-xs">
+          SafeCircle Auth v{APP_VERSION}
+        </p>
       </div>
       <div className="relative hidden lg:block">
         <img

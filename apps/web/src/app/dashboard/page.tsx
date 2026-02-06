@@ -2,14 +2,12 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { authClient } from "@/lib/auth-client";
-
-import Dashboard from "./dashboard";
+import { DashboardOverview } from "@/components/dashboard/overview";
 
 export default async function DashboardPage() {
-  const session = await authClient.getSession({
+  const { data: session } = await authClient.getSession({
     fetchOptions: {
       headers: await headers(),
-      throw: true,
     },
   });
 
@@ -24,10 +22,10 @@ export default async function DashboardPage() {
   });
 
   return (
-    <div>
-      <h1>Dashboard</h1>
-      <p>Welcome {session.user.name}</p>
-      <Dashboard session={session} customerState={customerState} />
-    </div>
+    <DashboardOverview
+      user={session.user}
+      session={session.session}
+      customerState={customerState}
+    />
   );
 }

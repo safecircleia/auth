@@ -2,6 +2,8 @@ import { Logo } from "@/components/logo";
 import { LoginForm } from "../../components/login-form";
 import Grainient from "@/components/Grainient";
 
+const APP_VERSION = "0.1.0";
+
 export default function LoginPage() {
   return (
     <div className="grid min-h-svh lg:grid-cols-2">
@@ -17,6 +19,9 @@ export default function LoginPage() {
             <LoginForm />
           </div>
         </div>
+        <p className="text-muted-foreground/60 text-center text-xs">
+          SafeCircle Auth v{APP_VERSION}
+        </p>
       </div>
       <div className="relative hidden lg:block">
         {/*<img

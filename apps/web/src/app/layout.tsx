@@ -49,8 +49,8 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "sc-auth",
-  description: "sc-auth",
+  title: "SafeCircle Auth",
+  description: "The Official SafeCircle Authentication Platform",
 };
 
 export default function RootLayout({

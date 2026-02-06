@@ -11,6 +11,7 @@
     "@base-ui/react": "^1.1.0",
     "@libsql/client": "catalog:",
     "@opennextjs/cloudflare": "^1.14.6",
+    "@better-auth/oauth-provider": "^1.4.18",
     "@polar-sh/better-auth": "catalog:",
     "@sc-auth/api": "workspace:*",
     "@sc-auth/auth": "workspace:*",

@@ -8,6 +8,7 @@
     "compile": "bun build --compile --minify --sourcemap --bytecode ./src/index.ts --outfile server"
   },
   "dependencies": {
+    "@better-auth/oauth-provider": "^1.4.18",
     "@hono/trpc-server": "^0.4.0",
     "@sc-auth/api": "workspace:*",
     "@sc-auth/auth": "workspace:*",
