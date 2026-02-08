@@ -7,6 +7,7 @@ import {
   View,
   StyleSheet,
 } from "react-native";
+import { router } from "expo-router";
 
 import { authClient } from "@/lib/auth-client";
 import { NAV_THEME } from "@/lib/constants";
@@ -38,7 +39,15 @@ function SignIn() {
           setError(error.error?.message || "Failed to sign in");
           setIsLoading(false);
         },
-        onSuccess() {
+        onSuccess(context) {
+          // Check if 2FA verification is required
+          if (context.data.twoFactorRedirect) {
+            // The twoFactorClient's onTwoFactorRedirect callback will handle the redirect
+            // But we can also handle it explicitly here if needed
+            router.push({ pathname: "/two-factor" });
+            setIsLoading(false);
+            return;
+          }
           setForm({ email: "", password: "" });
           queryClient.refetchQueries();
         },
@@ -50,19 +59,35 @@ function SignIn() {
   }
 
   return (
-    <View style={[styles.card, { backgroundColor: theme.card, borderColor: theme.border }]}>
+    <View
+      style={[
+        styles.card,
+        { backgroundColor: theme.card, borderColor: theme.border },
+      ]}
+    >
       <Text style={[styles.title, { color: theme.text }]}>Sign In</Text>
 
       {error ? (
-        <View style={[styles.errorContainer, { backgroundColor: theme.notification + "20" }]}>
-          <Text style={[styles.errorText, { color: theme.notification }]}>{error}</Text>
+        <View
+          style={[
+            styles.errorContainer,
+            { backgroundColor: theme.notification + "20" },
+          ]}
+        >
+          <Text style={[styles.errorText, { color: theme.notification }]}>
+            {error}
+          </Text>
         </View>
       ) : null}
 
       <TextInput
         style={[
           styles.input,
-          { color: theme.text, borderColor: theme.border, backgroundColor: theme.background },
+          {
+            color: theme.text,
+            borderColor: theme.border,
+            backgroundColor: theme.background,
+          },
         ]}
         placeholder="Email"
         placeholderTextColor={theme.text}
@@ -75,7 +100,11 @@ function SignIn() {
       <TextInput
         style={[
           styles.input,
-          { color: theme.text, borderColor: theme.border, backgroundColor: theme.background },
+          {
+            color: theme.text,
+            borderColor: theme.border,
+            backgroundColor: theme.background,
+          },
         ]}
         placeholder="Password"
         placeholderTextColor={theme.text}
@@ -87,7 +116,10 @@ function SignIn() {
       <TouchableOpacity
         onPress={handleLogin}
         disabled={isLoading}
-        style={[styles.button, { backgroundColor: theme.primary, opacity: isLoading ? 0.5 : 1 }]}
+        style={[
+          styles.button,
+          { backgroundColor: theme.primary, opacity: isLoading ? 0.5 : 1 },
+        ]}
       >
         {isLoading ? (
           <ActivityIndicator size="small" color="#ffffff" />

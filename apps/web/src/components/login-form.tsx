@@ -4,7 +4,7 @@ import { useForm } from "@tanstack/react-form";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import z from "zod";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
 import { cn } from "@/lib/utils";
 import { authClient } from "@/lib/auth-client";
@@ -18,20 +18,19 @@ import {
   FieldSeparator,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { OAuthProviders } from "./oauth-providers";
 import Loader from "./loader";
 
 export function LoginForm({ className }: { className?: string }) {
   const router = useRouter();
-  const { isPending } = authClient.useSession();
-  const [lastMethod, setLastMethod] = useState<string | null>(null);
+  const { data: session, isPending } = authClient.useSession();
 
+  // Redirect authenticated users to dashboard
   useEffect(() => {
-    // Get the last used login method
-    const method = authClient.getLastUsedLoginMethod();
-    setLastMethod(method);
-  }, []);
+    if (session?.user && !isPending) {
+      router.push("/dashboard");
+    }
+  }, [session, isPending, router]);
 
   const form = useForm({
     defaultValues: {
@@ -45,7 +44,13 @@ export function LoginForm({ className }: { className?: string }) {
           password: value.password,
         },
         {
-          onSuccess: () => {
+          onSuccess: (context) => {
+            // Check if 2FA verification is required
+            if (context.data.twoFactorRedirect) {
+              // Redirect to 2FA verification page
+              window.location.href = "/two-factor";
+              return;
+            }
             router.push("/dashboard");
             toast.success("Sign in successful");
           },
@@ -63,15 +68,13 @@ export function LoginForm({ className }: { className?: string }) {
     },
   });
 
-  if (isPending) {
+  if (isPending || session?.user) {
     return (
       <div className="flex items-center justify-center">
         <Loader />
       </div>
     );
   }
-
-  const isEmailLastMethod = lastMethod === "email";
 
   return (
     <form
@@ -140,16 +143,10 @@ export function LoginForm({ className }: { className?: string }) {
             {(state) => (
               <Button
                 type="submit"
-                className="w-full relative"
-                variant={isEmailLastMethod ? "default" : "outline"}
+                className="w-full"
                 disabled={!state.canSubmit || state.isSubmitting}
               >
                 {state.isSubmitting ? "Signing in..." : "Login"}
-                {isEmailLastMethod && (
-                  <Badge variant="secondary" className="ml-2 text-xs">
-                    Last used
-                  </Badge>
-                )}
               </Button>
             )}
           </form.Subscribe>
@@ -157,7 +154,7 @@ export function LoginForm({ className }: { className?: string }) {
 
         <FieldSeparator>Or continue with</FieldSeparator>
 
-        <OAuthProviders mode="login" lastMethod={lastMethod} />
+        <OAuthProviders mode="login" />
 
         <FieldDescription className="text-center">
           Don&apos;t have an account?{" "}

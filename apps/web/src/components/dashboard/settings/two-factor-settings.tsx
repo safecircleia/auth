@@ -41,6 +41,14 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { InputOTP } from "@/components/ui/input-otp";
 
 export function TwoFactorSettings() {
@@ -52,6 +60,12 @@ export function TwoFactorSettings() {
   const [isDisabling, setIsDisabling] = useState(false);
   const [isGeneratingBackupCodes, setIsGeneratingBackupCodes] = useState(false);
 
+  const [showPasswordDialog, setShowPasswordDialog] = useState(false);
+  const [showBackupPasswordDialog, setShowBackupPasswordDialog] =
+    useState(false);
+  const [enablePassword, setEnablePassword] = useState("");
+  const [backupPassword, setBackupPassword] = useState("");
+
   const [showSetup, setShowSetup] = useState(false);
   const [totpUri, setTotpUri] = useState("");
   const [secret, setSecret] = useState("");
@@ -62,10 +76,15 @@ export function TwoFactorSettings() {
   const [disablePassword, setDisablePassword] = useState("");
 
   const handleEnableTwoFactor = async () => {
+    if (!enablePassword) {
+      toast.error("Please enter your password");
+      return;
+    }
+
     setIsEnabling(true);
     try {
       const { data, error } = await authClient.twoFactor.enable({
-        password: "", // Will prompt for password if required
+        password: enablePassword,
       });
 
       if (error) {
@@ -82,6 +101,8 @@ export function TwoFactorSettings() {
         setSecret(secretMatch ? secretMatch[1] : "");
         setBackupCodes(data.backupCodes);
         setShowSetup(true);
+        setShowPasswordDialog(false);
+        setEnablePassword("");
       }
     } catch (err) {
       toast.error("Failed to enable two-factor authentication");
@@ -147,10 +168,15 @@ export function TwoFactorSettings() {
   };
 
   const handleGenerateBackupCodes = async () => {
+    if (!backupPassword) {
+      toast.error("Please enter your password");
+      return;
+    }
+
     setIsGeneratingBackupCodes(true);
     try {
       const { data, error } = await authClient.twoFactor.generateBackupCodes({
-        password: "",
+        password: backupPassword,
       });
 
       if (error) {
@@ -158,6 +184,8 @@ export function TwoFactorSettings() {
       } else if (data) {
         setBackupCodes(data.backupCodes);
         setShowBackupCodes(true);
+        setShowBackupPasswordDialog(false);
+        setBackupPassword("");
         toast.success("New backup codes generated");
       }
     } catch (err) {
@@ -223,18 +251,9 @@ export function TwoFactorSettings() {
         </CardContent>
         <CardFooter className="border-t pt-6">
           {!isTwoFactorEnabled ? (
-            <Button onClick={handleEnableTwoFactor} disabled={isEnabling}>
-              {isEnabling ? (
-                <>
-                  <IconLoader2 className="mr-2 size-4 animate-spin" />
-                  Setting up...
-                </>
-              ) : (
-                <>
-                  <IconShield className="mr-2 size-4" />
-                  Enable Two-Factor Auth
-                </>
-              )}
+            <Button onClick={() => setShowPasswordDialog(true)}>
+              <IconShield className="mr-2 size-4" />
+              Enable Two-Factor Auth
             </Button>
           ) : (
             <AlertDialog>
@@ -283,6 +302,65 @@ export function TwoFactorSettings() {
           )}
         </CardFooter>
       </Card>
+
+      {/* Password Dialog for Enabling 2FA */}
+      <Dialog open={showPasswordDialog} onOpenChange={setShowPasswordDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <IconShield className="size-5 text-primary" />
+              Enable Two-Factor Authentication
+            </DialogTitle>
+            <DialogDescription>
+              Enter your password to set up two-factor authentication.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <Field>
+              <FieldLabel htmlFor="enablePassword">Password</FieldLabel>
+              <Input
+                id="enablePassword"
+                type="password"
+                placeholder="Enter your password"
+                value={enablePassword}
+                onChange={(e) => setEnablePassword(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && enablePassword) {
+                    handleEnableTwoFactor();
+                  }
+                }}
+              />
+              <FieldDescription>
+                Your password is required to enable 2FA
+              </FieldDescription>
+            </Field>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowPasswordDialog(false);
+                setEnablePassword("");
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleEnableTwoFactor}
+              disabled={isEnabling || !enablePassword}
+            >
+              {isEnabling ? (
+                <>
+                  <IconLoader2 className="mr-2 size-4 animate-spin" />
+                  Setting up...
+                </>
+              ) : (
+                "Continue"
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Setup Card */}
       {showSetup && (
@@ -434,8 +512,64 @@ export function TwoFactorSettings() {
           <CardFooter className="border-t pt-6">
             <Button
               variant="outline"
+              onClick={() => setShowBackupPasswordDialog(true)}
+            >
+              <IconKey className="mr-2 size-4" />
+              Generate New Backup Codes
+            </Button>
+          </CardFooter>
+        </Card>
+      )}
+
+      {/* Password Dialog for Generating Backup Codes */}
+      <Dialog
+        open={showBackupPasswordDialog}
+        onOpenChange={setShowBackupPasswordDialog}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <IconKey className="size-5 text-primary" />
+              Generate New Backup Codes
+            </DialogTitle>
+            <DialogDescription>
+              Enter your password to generate new backup codes. This will
+              invalidate your existing backup codes.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <Field>
+              <FieldLabel htmlFor="backupPassword">Password</FieldLabel>
+              <Input
+                id="backupPassword"
+                type="password"
+                placeholder="Enter your password"
+                value={backupPassword}
+                onChange={(e) => setBackupPassword(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && backupPassword) {
+                    handleGenerateBackupCodes();
+                  }
+                }}
+              />
+              <FieldDescription>
+                Your password is required to generate new backup codes
+              </FieldDescription>
+            </Field>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowBackupPasswordDialog(false);
+                setBackupPassword("");
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
               onClick={handleGenerateBackupCodes}
-              disabled={isGeneratingBackupCodes}
+              disabled={isGeneratingBackupCodes || !backupPassword}
             >
               {isGeneratingBackupCodes ? (
                 <>
@@ -443,15 +577,12 @@ export function TwoFactorSettings() {
                   Generating...
                 </>
               ) : (
-                <>
-                  <IconKey className="mr-2 size-4" />
-                  Generate New Backup Codes
-                </>
+                "Generate Codes"
               )}
             </Button>
-          </CardFooter>
-        </Card>
-      )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* How It Works */}
       <Card>

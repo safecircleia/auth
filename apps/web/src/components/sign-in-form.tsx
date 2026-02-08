@@ -10,7 +10,11 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 
-export default function SignInForm({ onSwitchToSignUp }: { onSwitchToSignUp: () => void }) {
+export default function SignInForm({
+  onSwitchToSignUp,
+}: {
+  onSwitchToSignUp: () => void;
+}) {
   const router = useRouter();
   const { isPending } = authClient.useSession();
 
@@ -26,7 +30,13 @@ export default function SignInForm({ onSwitchToSignUp }: { onSwitchToSignUp: () 
           password: value.password,
         },
         {
-          onSuccess: () => {
+          onSuccess: (context) => {
+            // Check if 2FA verification is required
+            if (context.data.twoFactorRedirect) {
+              // Redirect to 2FA verification page
+              window.location.href = "/two-factor";
+              return;
+            }
             router.push("/dashboard");
             toast.success("Sign in successful");
           },

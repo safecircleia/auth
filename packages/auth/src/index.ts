@@ -7,7 +7,7 @@ import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { jwt } from "better-auth/plugins";
 import { oauthProvider } from "@better-auth/oauth-provider";
 import { polarClient } from "./lib/payments";
-import { sendOTPEmail } from "./lib/email";
+import { sendOTPEmail, send2FAOTPEmail } from "./lib/email";
 import { twoFactor } from "better-auth/plugins";
 import { emailOTP } from "better-auth/plugins";
 import { passkey } from "@better-auth/passkey";
@@ -18,6 +18,8 @@ import { deviceAuthorization } from "better-auth/plugins";
 import { lastLoginMethod } from "better-auth/plugins";
 import { phoneNumber } from "better-auth/plugins";
 import { expo } from "@better-auth/expo";
+
+const isProduction = process.env.NODE_ENV === "production";
 
 const authConfig = {
   database: drizzleAdapter(db, {
@@ -55,16 +57,19 @@ const authConfig = {
   advanced: {
     cookiePrefix: "sc",
     defaultCookieAttributes: {
-      sameSite: "none",
-      secure: false,
+      // In development: use "lax" with secure: false for localhost
+      // In production: use "none" with secure: true for cross-origin requests
+      sameSite: isProduction ? "none" : "lax",
+      secure: isProduction,
       httpOnly: true,
     },
-    // uncomment crossSubDomainCookies setting when ready to deploy and replace <your-workers-subdomain> with your actual workers subdomain
-    // https://developers.cloudflare.com/workers/wrangler/configuration/#workersdev
-    crossSubDomainCookies: {
-      enabled: true,
-      domain: "tresillo.workers.dev",
-    },
+    // Only enable crossSubDomainCookies in production
+    ...(isProduction && {
+      crossSubDomainCookies: {
+        enabled: true,
+        domain: "tresillo.workers.dev",
+      },
+    }),
   },
   socialProviders: {
     google: {
@@ -108,7 +113,7 @@ const authConfig = {
       ],
     }),
     expo(),
-    lastLoginMethod(),
+    // lastLoginMethod(), // Temporaly disabled due to auth issues locally
     deviceAuthorization({
       verificationUri: "/device",
     }),
@@ -123,11 +128,43 @@ const authConfig = {
       },
     }),
     phoneNumber({
-      sendOTP: ({ phoneNumber, code }, ctx) => {
+      sendOTP: ({ phoneNumber, code }) => {
         // Implement sending OTP code via SMS
+        console.log(`Send OTP ${code} to ${phoneNumber}`);
       },
     }),
-    twoFactor(),
+    twoFactor({
+      // The issuer is displayed in authenticator apps (e.g., Google Authenticator)
+      issuer: "SafeCircle Auth",
+      // TOTP configuration
+      totpOptions: {
+        // Number of digits in the OTP code
+        digits: 6,
+        // Time period in seconds for TOTP code validity
+        period: 30,
+      },
+      // OTP configuration (for email/SMS-based 2FA)
+      otpOptions: {
+        // Send OTP to user's email for 2FA verification
+        async sendOTP({ user, otp }) {
+          await send2FAOTPEmail({
+            to: user.email,
+            otp,
+          });
+        },
+        // OTP validity period in minutes
+        period: 5,
+      },
+      // Backup codes configuration
+      backupCodeOptions: {
+        // Number of backup codes to generate
+        amount: 10,
+        // Length of each backup code
+        length: 10,
+      },
+      // Skip TOTP verification when enabling 2FA (user must verify before twoFactorEnabled is set to true)
+      skipVerificationOnEnable: false,
+    }),
     jwt(),
     oauthProvider({
       silenceWarnings: {

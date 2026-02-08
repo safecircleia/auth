@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "@tanstack/react-form";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -26,7 +26,7 @@ type SignupStep = "form" | "verify";
 
 export function SignupForm({ className }: { className?: string }) {
   const router = useRouter();
-  const { isPending } = authClient.useSession();
+  const { data: session, isPending } = authClient.useSession();
   const [step, setStep] = useState<SignupStep>("form");
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
@@ -125,7 +125,14 @@ export function SignupForm({ className }: { className?: string }) {
     }
   };
 
-  if (isPending) {
+  // Redirect authenticated users to dashboard
+  useEffect(() => {
+    if (session?.user && !isPending) {
+      router.push("/dashboard");
+    }
+  }, [session, isPending, router]);
+
+  if (isPending || session?.user) {
     return (
       <div className="flex items-center justify-center">
         <Loader />
