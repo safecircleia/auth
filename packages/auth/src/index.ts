@@ -56,7 +56,7 @@ const authConfig = {
     cookiePrefix: "sc",
     defaultCookieAttributes: {
       sameSite: "none",
-      secure: true,
+      secure: false,
       httpOnly: true,
     },
     // uncomment crossSubDomainCookies setting when ready to deploy and replace <your-workers-subdomain> with your actual workers subdomain
