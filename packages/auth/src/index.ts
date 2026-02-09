@@ -15,7 +15,6 @@ import { admin } from "better-auth/plugins";
 import { apiKey } from "better-auth/plugins";
 import { organization } from "better-auth/plugins";
 import { deviceAuthorization } from "better-auth/plugins";
-import { lastLoginMethod } from "better-auth/plugins";
 import { phoneNumber } from "better-auth/plugins";
 import { expo } from "@better-auth/expo";
 

@@ -1,25 +1,16 @@
-import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
-import { authClient } from "@/lib/auth-client";
+import { authServerClient } from "@/lib/auth-server";
 import { BillingSettings } from "@/components/dashboard/settings/billing-settings";
 
 export default async function BillingPage() {
-  const { data: session } = await authClient.getSession({
-    fetchOptions: {
-      headers: await headers(),
-    },
-  });
+  const { data: session } = await authServerClient.getSession();
 
   if (!session?.user) {
     redirect("/login");
   }
 
-  const { data: customerState } = await authClient.customer.state({
-    fetchOptions: {
-      headers: await headers(),
-    },
-  });
+  const { data: customerState } = await authServerClient.customer.state();
 
   return <BillingSettings customerState={customerState} user={session.user} />;
 }

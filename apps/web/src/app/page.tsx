@@ -1,15 +1,10 @@
-import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
-import { authClient } from "@/lib/auth-client";
+import { authServerClient } from "@/lib/auth-server";
 import { HomePage } from "@/components/home-page";
 
 export default async function Page() {
-  const { data: session } = await authClient.getSession({
-    fetchOptions: {
-      headers: await headers(),
-    },
-  });
+  const { data: session } = await authServerClient.getSession();
 
   if (session?.user) {
     redirect("/dashboard");

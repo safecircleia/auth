@@ -1,15 +1,10 @@
-import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
-import { authClient } from "@/lib/auth-client";
+import { authServerClient } from "@/lib/auth-server";
 import { ProfileSettings } from "@/components/dashboard/settings/profile-settings";
 
 export default async function ProfileSettingsPage() {
-  const { data: session } = await authClient.getSession({
-    fetchOptions: {
-      headers: await headers(),
-    },
-  });
+  const { data: session } = await authServerClient.getSession();
 
   if (!session?.user) {
     redirect("/login");
