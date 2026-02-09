@@ -8,8 +8,6 @@ import {
   IconCopy,
   IconLoader2,
   IconAlertTriangle,
-  IconEye,
-  IconEyeOff,
   IconCalendar,
 } from "@tabler/icons-react";
 import { toast } from "sonner";
@@ -44,6 +42,17 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogClose,
+  type DialogContentProps,
+} from "@/components/animate-ui/components/radix/dialog";
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -66,7 +75,9 @@ export function ApiKeysSettings() {
   const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isCreating, setIsCreating] = useState(false);
-  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [dialogFrom, setDialogFrom] =
+    useState<DialogContentProps["from"]>("top");
   const [newKeySecret, setNewKeySecret] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
@@ -127,7 +138,7 @@ export function ApiKeysSettings() {
         toast.success("API key created successfully");
         setNewKeyName("");
         setExpiresIn("never");
-        setShowCreateForm(false);
+        setShowCreateDialog(false);
         fetchApiKeys();
       }
     } catch (err) {
@@ -181,11 +192,95 @@ export function ApiKeysSettings() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">API Keys</h1>
-        <p className="text-muted-foreground">
-          Create and manage API keys for programmatic access
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">API Keys</h1>
+          <p className="text-muted-foreground">
+            Create and manage API keys for programmatic access
+          </p>
+        </div>
+        <Dialog
+          open={showCreateDialog}
+          onOpenChange={setShowCreateDialog}
+          defaultOpen={false}
+        >
+          <DialogTrigger asChild>
+            <Button className="gap-2">
+              <IconPlus className="size-4" />
+              Create API Key
+            </Button>
+          </DialogTrigger>
+          <DialogContent
+            from={dialogFrom}
+            showCloseButton={true}
+            className="sm:max-w-[500px]"
+          >
+            <DialogHeader>
+              <DialogTitle>Create API Key</DialogTitle>
+              <DialogDescription>
+                Generate a new API key for programmatic access to your account
+              </DialogDescription>
+            </DialogHeader>
+
+            <FieldGroup className="space-y-4">
+              <Field>
+                <FieldLabel htmlFor="keyName">Key Name</FieldLabel>
+                <Input
+                  id="keyName"
+                  placeholder="My API Key"
+                  value={newKeyName}
+                  onChange={(e) => setNewKeyName(e.target.value)}
+                />
+                <FieldDescription>
+                  A friendly name to identify this key
+                </FieldDescription>
+              </Field>
+
+              <Field>
+                <FieldLabel htmlFor="expiresIn">Expiration</FieldLabel>
+                <Select value={expiresIn} onValueChange={setExpiresIn}>
+                  <SelectTrigger id="expiresIn">
+                    <SelectValue placeholder="Select expiration" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="never">Never expires</SelectItem>
+                    <SelectItem value="30d">30 days</SelectItem>
+                    <SelectItem value="90d">90 days</SelectItem>
+                    <SelectItem value="1y">1 year</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FieldDescription>
+                  When should this key expire?
+                </FieldDescription>
+              </Field>
+            </FieldGroup>
+
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setNewKeyName("");
+                    setExpiresIn("never");
+                  }}
+                  disabled={isCreating}
+                >
+                  Cancel
+                </Button>
+              </DialogClose>
+              <Button onClick={handleCreateKey} disabled={isCreating}>
+                {isCreating ? (
+                  <>
+                    <IconLoader2 className="mr-2 size-4 animate-spin" />
+                    Creating...
+                  </>
+                ) : (
+                  "Create API Key"
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
 
       {/* New Key Secret Modal */}
@@ -220,80 +315,6 @@ export function ApiKeysSettings() {
             </Button>
           </CardFooter>
         </Card>
-      )}
-
-      {/* Create New Key */}
-      {showCreateForm ? (
-        <Card>
-          <CardHeader>
-            <CardTitle>Create API Key</CardTitle>
-            <CardDescription>
-              Generate a new API key for programmatic access to your account
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <FieldGroup className="space-y-4">
-              <Field>
-                <FieldLabel htmlFor="keyName">Key Name</FieldLabel>
-                <Input
-                  id="keyName"
-                  placeholder="My API Key"
-                  value={newKeyName}
-                  onChange={(e) => setNewKeyName(e.target.value)}
-                />
-                <FieldDescription>
-                  A friendly name to identify this key
-                </FieldDescription>
-              </Field>
-
-              <Field>
-                <FieldLabel htmlFor="expiresIn">Expiration</FieldLabel>
-                <Select value={expiresIn} onValueChange={setExpiresIn}>
-                  <SelectTrigger id="expiresIn">
-                    <SelectValue placeholder="Select expiration" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="never">Never expires</SelectItem>
-                    <SelectItem value="30d">30 days</SelectItem>
-                    <SelectItem value="90d">90 days</SelectItem>
-                    <SelectItem value="1y">1 year</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FieldDescription>
-                  When should this key expire?
-                </FieldDescription>
-              </Field>
-            </FieldGroup>
-          </CardContent>
-          <CardFooter className="flex gap-3 border-t pt-6">
-            <Button
-              variant="outline"
-              onClick={() => {
-                setShowCreateForm(false);
-                setNewKeyName("");
-                setExpiresIn("never");
-              }}
-              disabled={isCreating}
-            >
-              Cancel
-            </Button>
-            <Button onClick={handleCreateKey} disabled={isCreating}>
-              {isCreating ? (
-                <>
-                  <IconLoader2 className="mr-2 size-4 animate-spin" />
-                  Creating...
-                </>
-              ) : (
-                "Create API Key"
-              )}
-            </Button>
-          </CardFooter>
-        </Card>
-      ) : (
-        <Button onClick={() => setShowCreateForm(true)} className="gap-2">
-          <IconPlus className="size-4" />
-          Create API Key
-        </Button>
       )}
 
       {/* API Keys List */}

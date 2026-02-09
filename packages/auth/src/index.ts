@@ -18,8 +18,6 @@ import { deviceAuthorization } from "better-auth/plugins";
 import { phoneNumber } from "better-auth/plugins";
 import { expo } from "@better-auth/expo";
 
-const isProduction = process.env.NODE_ENV === "production";
-
 const authConfig = {
   database: drizzleAdapter(db, {
     provider: "sqlite",
@@ -42,11 +40,11 @@ const authConfig = {
   },
   // uncomment cookieCache setting when ready to deploy to Cloudflare using *.workers.dev domains
   session: {
-    cookieCache: {
-      enabled: true,
-      maxAge: 5 * 60,
-      strategy: "jwt", // or "jwt" or "jwe"
-    },
+    // cookieCache: {
+    //   enabled: true,
+    //   maxAge: 5 * 60,
+    //   strategy: "jwt", // or "jwt" or "jwe"
+    // },
     storeSessionInDatabase: true,
   },
   // secret: "dasdasda", // Use this to generate DB schema
@@ -56,19 +54,16 @@ const authConfig = {
   advanced: {
     cookiePrefix: "sc",
     defaultCookieAttributes: {
-      // In development: use "lax" with secure: false for localhost
-      // In production: use "none" with secure: true for cross-origin requests
-      sameSite: isProduction ? "none" : "lax",
-      secure: isProduction,
+      sameSite: "none",
+      secure: true,
       httpOnly: true,
     },
-    // Only enable crossSubDomainCookies in production
-    ...(isProduction && {
-      crossSubDomainCookies: {
-        enabled: true,
-        domain: "tresillo.workers.dev",
-      },
-    }),
+    // uncomment crossSubDomainCookies setting when ready to deploy and replace <your-workers-subdomain> with your actual workers subdomain
+    // https://developers.cloudflare.com/workers/wrangler/configuration/#workersdev
+    // crossSubDomainCookies: {
+    //   enabled: true,
+    //   domain: "<your-workers-subdomain>",
+    // },
   },
   socialProviders: {
     google: {
@@ -112,7 +107,6 @@ const authConfig = {
       ],
     }),
     expo(),
-    // lastLoginMethod(), // Temporaly disabled due to auth issues locally
     deviceAuthorization({
       verificationUri: "/device",
     }),
@@ -132,38 +126,38 @@ const authConfig = {
         console.log(`Send OTP ${code} to ${phoneNumber}`);
       },
     }),
-    twoFactor({
-      // The issuer is displayed in authenticator apps (e.g., Google Authenticator)
-      issuer: "SafeCircle Auth",
-      // TOTP configuration
-      totpOptions: {
-        // Number of digits in the OTP code
-        digits: 6,
-        // Time period in seconds for TOTP code validity
-        period: 30,
-      },
-      // OTP configuration (for email/SMS-based 2FA)
-      otpOptions: {
-        // Send OTP to user's email for 2FA verification
-        async sendOTP({ user, otp }) {
-          await send2FAOTPEmail({
-            to: user.email,
-            otp,
-          });
-        },
-        // OTP validity period in minutes
-        period: 5,
-      },
-      // Backup codes configuration
-      backupCodeOptions: {
-        // Number of backup codes to generate
-        amount: 10,
-        // Length of each backup code
-        length: 10,
-      },
-      // Skip TOTP verification when enabling 2FA (user must verify before twoFactorEnabled is set to true)
-      skipVerificationOnEnable: false,
-    }),
+    // twoFactor({
+    //   // The issuer is displayed in authenticator apps (e.g., Google Authenticator)
+    //   issuer: "SafeCircle Auth",
+    //   // TOTP configuration
+    //   totpOptions: {
+    //     // Number of digits in the OTP code
+    //     digits: 6,
+    //     // Time period in seconds for TOTP code validity
+    //     period: 30,
+    //   },
+    //   // OTP configuration (for email/SMS-based 2FA)
+    //   otpOptions: {
+    //     // Send OTP to user's email for 2FA verification
+    //     async sendOTP({ user, otp }) {
+    //       await send2FAOTPEmail({
+    //         to: user.email,
+    //         otp,
+    //       });
+    //     },
+    //     // OTP validity period in minutes
+    //     period: 5,
+    //   },
+    //   // Backup codes configuration
+    //   backupCodeOptions: {
+    //     // Number of backup codes to generate
+    //     amount: 10,
+    //     // Length of each backup code
+    //     length: 10,
+    //   },
+    //   // Skip TOTP verification when enabling 2FA (user must verify before twoFactorEnabled is set to true)
+    //   skipVerificationOnEnable: false,
+    // }),
     jwt(),
     oauthProvider({
       silenceWarnings: {
@@ -173,7 +167,6 @@ const authConfig = {
       // The plugin will redirect users to these pages during the OAuth flow
       loginPage: "/login",
       consentPage: "/consent",
-
       // Supported scopes for OAuth clients
       // These define what permissions clients can request
       scopes: [
@@ -183,62 +176,47 @@ const authConfig = {
         "offline_access", // Returns a refresh token for long-lived access
         "read:organization", // Custom scope for organization access
       ],
-
       // Token expiration settings (in seconds)
       accessTokenExpiresIn: 3600, // 1 hour
       refreshTokenExpiresIn: 2592000, // 30 days
       idTokenExpiresIn: 36000, // 10 hours
       codeExpiresIn: 600, // 10 minutes
-
       // Dynamic client registration settings
       // Enable this to allow clients to register themselves
       allowDynamicClientRegistration: true,
-
       // WARNING: Only enable this for MCP or similar use cases
       // This allows public clients to register without authentication
       // allowUnauthenticatedClientRegistration: true,
-
       // Default scopes for dynamically registered clients
       clientRegistrationDefaultScopes: ["openid", "profile", "email"],
-
       // Additional allowed scopes beyond defaults for registered clients
       clientRegistrationAllowedScopes: ["offline_access", "read:organization"],
-
       // Custom claims to add to ID tokens
       customIdTokenClaims: ({ scopes }) => {
         const claims: Record<string, unknown> = {};
-
         // Add locale if profile scope is granted
         if (scopes.includes("profile")) {
           claims.locale = "en-US";
         }
-
         return claims;
       },
-
       // Custom claims to add to access tokens
       customAccessTokenClaims: ({ scopes, referenceId }) => {
         const claims: Record<string, unknown> = {};
-
         // Add organization info if organization scope is granted
         if (scopes.includes("read:organization") && referenceId) {
           claims["https://safecircle.com/org"] = referenceId;
         }
-
         return claims;
       },
-
       // Custom claims for the UserInfo endpoint
       customUserInfoClaims: ({ scopes }) => {
         const claims: Record<string, unknown> = {};
-
         if (scopes.includes("profile")) {
           claims.locale = "en-US";
         }
-
         return claims;
       },
-
       // Advertised metadata for discovery endpoints
       // This controls what's shown in .well-known endpoints
       advertisedMetadata: {
@@ -252,12 +230,10 @@ const authConfig = {
           "locale",
         ],
       },
-
       // Storage method for client secrets
       // "hashed" is more secure (recommended for most cases)
       // "encrypted" is needed if disableJwtPlugin is true
       storeClientSecret: "hashed",
-
       // Storage method for tokens (refresh tokens and opaque access tokens)
       storeTokens: "hashed",
     }),

@@ -35,15 +35,6 @@ export function ProfileSettings({ user }: ProfileSettingsProps) {
   const [isUpdating, setIsUpdating] = useState(false);
   const [isSendingVerification, setIsSendingVerification] = useState(false);
 
-  const getInitials = (name: string) => {
-    return name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2);
-  };
-
   const handleUpdateProfile = async () => {
     setIsUpdating(true);
     try {
@@ -104,9 +95,7 @@ export function ProfileSettings({ user }: ProfileSettingsProps) {
         <CardContent className="flex items-center gap-6">
           <Avatar className="size-24">
             <AvatarImage src={image || undefined} alt={name} />
-            <AvatarFallback className="text-2xl">
-              {getInitials(name)}
-            </AvatarFallback>
+            <AvatarFallback name={user.email || name} className="text-2xl" />
           </Avatar>
           <div className="flex-1">
             <Field>
@@ -129,9 +118,7 @@ export function ProfileSettings({ user }: ProfileSettingsProps) {
       <Card>
         <CardHeader>
           <CardTitle>Personal Information</CardTitle>
-          <CardDescription>
-            Update your personal details
-          </CardDescription>
+          <CardDescription>Update your personal details</CardDescription>
         </CardHeader>
         <CardContent>
           <FieldGroup className="space-y-4">
@@ -207,9 +194,7 @@ export function ProfileSettings({ user }: ProfileSettingsProps) {
       <Card>
         <CardHeader>
           <CardTitle>Account Details</CardTitle>
-          <CardDescription>
-            Information about your account
-          </CardDescription>
+          <CardDescription>Information about your account</CardDescription>
         </CardHeader>
         <CardContent>
           <dl className="space-y-4">

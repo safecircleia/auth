@@ -47,6 +47,7 @@
     "@sc-auth/env": "workspace:*",
     "alchemy": "https://pkg.pr.new/alchemy-run/alchemy@1313",
     "dotenv": "catalog:",
+    "facehash": "^0.0.7",
     "zod": "catalog:"
   },
   "devDependencies": {

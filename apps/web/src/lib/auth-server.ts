@@ -29,7 +29,7 @@ const BETTER_AUTH_COOKIE_PREFIX = "sc";
 export const authServerClient = createAuthClient({
   baseURL: env.NEXT_PUBLIC_SERVER_URL,
   plugins: [
-    twoFactorClient(),
+    // twoFactorClient(),
     polarClient(),
     passkeyClient(),
     emailOTPClient(),

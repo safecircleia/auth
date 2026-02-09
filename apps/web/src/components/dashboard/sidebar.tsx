@@ -15,6 +15,9 @@ import {
   IconMail,
   IconPhone,
   IconBuildingStore,
+  IconCommand,
+  IconSelector,
+  IconLogout,
 } from "@tabler/icons-react";
 
 import {
@@ -33,6 +36,13 @@ import {
 import { Logo } from "@/components/logo";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { authClient } from "@/lib/auth-client";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
+import { useRouter } from "next/navigation";
 
 interface DashboardSidebarProps {
   user: typeof authClient.$Infer.Session.user;
@@ -102,6 +112,7 @@ const billingNavItems = [
 
 export function DashboardSidebar({ user }: DashboardSidebarProps) {
   const pathname = usePathname();
+  const router = useRouter();
 
   const isActive = (href: string) => {
     if (href === "/dashboard") {
@@ -110,32 +121,48 @@ export function DashboardSidebar({ user }: DashboardSidebarProps) {
     return pathname.startsWith(href);
   };
 
-  const getInitials = (name: string) => {
-    return name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2);
+  const handleSignOut = async () => {
+    await authClient.signOut({
+      fetchOptions: {
+        onSuccess: () => {
+          router.push("/");
+        },
+      },
+    });
   };
 
   return (
-    <Sidebar>
-      <SidebarHeader className="border-b border-sidebar-border">
-        <div className="flex items-center gap-2 px-2 py-2">
-          <Logo size="sm" />
-          <span className="font-semibold">SafeCircle</span>
-        </div>
+    <Sidebar collapsible="icon">
+      <SidebarHeader>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton size="lg" asChild>
+              <Link href="/dashboard">
+                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+                  <Logo size="sm" />
+                </div>
+                <div className="grid flex-1 text-left text-sm leading-tight">
+                  <span className="truncate font-semibold">SafeCircle</span>
+                  <span className="truncate text-xs">Enterprise</span>
+                </div>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
       </SidebarHeader>
 
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Dashboard</SidebarGroupLabel>
+          <SidebarGroupLabel>Platform</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {mainNavItems.map((item) => (
                 <SidebarMenuItem key={item.href}>
-                  <SidebarMenuButton asChild isActive={isActive(item.href)}>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={isActive(item.href)}
+                    tooltip={item.title}
+                  >
                     <Link href={item.href as any}>
                       <item.icon className="size-4" />
                       <span>{item.title}</span>
@@ -153,7 +180,11 @@ export function DashboardSidebar({ user }: DashboardSidebarProps) {
             <SidebarMenu>
               {settingsNavItems.map((item) => (
                 <SidebarMenuItem key={item.href}>
-                  <SidebarMenuButton asChild isActive={isActive(item.href)}>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={isActive(item.href)}
+                    tooltip={item.title}
+                  >
                     <Link href={item.href as any}>
                       <item.icon className="size-4" />
                       <span>{item.title}</span>
@@ -171,7 +202,11 @@ export function DashboardSidebar({ user }: DashboardSidebarProps) {
             <SidebarMenu>
               {appsNavItems.map((item) => (
                 <SidebarMenuItem key={item.href}>
-                  <SidebarMenuButton asChild isActive={isActive(item.href)}>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={isActive(item.href)}
+                    tooltip={item.title}
+                  >
                     <Link href={item.href as any}>
                       <item.icon className="size-4" />
                       <span>{item.title}</span>
@@ -189,7 +224,11 @@ export function DashboardSidebar({ user }: DashboardSidebarProps) {
             <SidebarMenu>
               {billingNavItems.map((item) => (
                 <SidebarMenuItem key={item.href}>
-                  <SidebarMenuButton asChild isActive={isActive(item.href)}>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={isActive(item.href)}
+                    tooltip={item.title}
+                  >
                     <Link href={item.href as any}>
                       <item.icon className="size-4" />
                       <span>{item.title}</span>
@@ -202,19 +241,45 @@ export function DashboardSidebar({ user }: DashboardSidebarProps) {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="border-t border-sidebar-border">
-        <div className="flex items-center gap-3 px-2 py-2">
-          <Avatar className="size-8">
-            <AvatarImage src={user.image || undefined} alt={user.name} />
-            <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
-          </Avatar>
-          <div className="flex flex-col min-w-0">
-            <span className="text-sm font-medium truncate">{user.name}</span>
-            <span className="text-xs text-muted-foreground truncate">
-              {user.email}
-            </span>
-          </div>
-        </div>
+      <SidebarFooter>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <SidebarMenuButton
+                  size="lg"
+                  className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+                >
+                  <Avatar className="h-8 w-8 rounded-lg">
+                    <AvatarImage
+                      src={user.image || undefined}
+                      alt={user.name}
+                    />
+                    <AvatarFallback className="rounded-lg">
+                      {user.name.slice(0, 2).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="grid flex-1 text-left text-sm leading-tight">
+                    <span className="truncate font-semibold">{user.name}</span>
+                    <span className="truncate text-xs">{user.email}</span>
+                  </div>
+                  <IconSelector className="ml-auto size-4" />
+                </SidebarMenuButton>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
+                side="bottom"
+                align="end"
+                sideOffset={4}
+              >
+                <DropdownMenuItem onClick={handleSignOut}>
+                  <IconLogout className="mr-2 size-4" />
+                  Log out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </SidebarMenuItem>
+        </SidebarMenu>
       </SidebarFooter>
 
       <SidebarRail />

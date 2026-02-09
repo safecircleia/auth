@@ -20,6 +20,28 @@ import {
   FieldGroup,
   FieldLabel,
 } from "@/components/ui/field";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogClose,
+  type DialogContentProps,
+} from "@/components/animate-ui/components/radix/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import Loader from "@/components/loader";
 import { toast } from "sonner";
 import {
@@ -31,6 +53,8 @@ import {
   IconKey,
   IconEye,
   IconEyeOff,
+  IconLoader2,
+  IconAlertTriangle,
 } from "@tabler/icons-react";
 
 interface OAuthClient {
@@ -54,9 +78,12 @@ export function OAuthApplications() {
   const [clients, setClients] = useState<OAuthClient[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isCreating, setIsCreating] = useState(false);
-  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [dialogFrom, setDialogFrom] =
+    useState<DialogContentProps["from"]>("top");
   const [newClientSecret, setNewClientSecret] = useState<string | null>(null);
   const [showSecrets, setShowSecrets] = useState<Record<string, boolean>>({});
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   // Form state for new client
   const [newClient, setNewClient] = useState({
@@ -107,7 +134,7 @@ export function OAuthApplications() {
         }
         toast.success("OAuth application created successfully");
         setNewClient({ name: "", redirectUri: "" });
-        setShowCreateForm(false);
+        setShowCreateDialog(false);
         fetchClients();
       }
     } catch (err) {
@@ -118,10 +145,7 @@ export function OAuthApplications() {
   }
 
   async function deleteClient(clientId: string) {
-    if (!confirm("Are you sure you want to delete this OAuth application?")) {
-      return;
-    }
-
+    setDeletingId(clientId);
     try {
       const { error } = await authClient.oauth2.deleteClient({
         client_id: clientId,
@@ -135,18 +159,12 @@ export function OAuthApplications() {
       }
     } catch (err) {
       toast.error("Failed to delete OAuth application");
+    } finally {
+      setDeletingId(null);
     }
   }
 
   async function rotateSecret(clientId: string) {
-    if (
-      !confirm(
-        "Are you sure you want to rotate the client secret? The old secret will be immediately invalidated.",
-      )
-    ) {
-      return;
-    }
-
     try {
       const { data, error } = await authClient.oauth2.client.rotateSecret({
         client_id: clientId,
@@ -221,68 +239,88 @@ export function OAuthApplications() {
         </Card>
       )}
 
-      {/* Create New Client Section */}
-      {showCreateForm ? (
-        <Card>
-          <CardHeader>
-            <CardTitle>Create OAuth Application</CardTitle>
-            <CardDescription>
+      {/* Create New Client Dialog */}
+      <Dialog
+        open={showCreateDialog}
+        onOpenChange={setShowCreateDialog}
+        defaultOpen={false}
+      >
+        <DialogTrigger asChild>
+          <Button className="gap-2">
+            <IconPlus className="size-4" />
+            Create OAuth Application
+          </Button>
+        </DialogTrigger>
+        <DialogContent
+          from={dialogFrom}
+          showCloseButton={true}
+          className="sm:max-w-[500px]"
+        >
+          <DialogHeader>
+            <DialogTitle>Create OAuth Application</DialogTitle>
+            <DialogDescription>
               Register a new OAuth client to allow external applications to
               authenticate with your server.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <FieldGroup className="space-y-4">
-              <Field>
-                <FieldLabel htmlFor="name">Application Name</FieldLabel>
-                <Input
-                  id="name"
-                  placeholder="My Application"
-                  value={newClient.name}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    setNewClient({ ...newClient, name: e.target.value })
-                  }
-                />
-                <FieldDescription>
-                  A friendly name for your application
-                </FieldDescription>
-              </Field>
+            </DialogDescription>
+          </DialogHeader>
 
-              <Field>
-                <FieldLabel htmlFor="redirectUri">Redirect URI</FieldLabel>
-                <Input
-                  id="redirectUri"
-                  placeholder="https://myapp.com/callback"
-                  value={newClient.redirectUri}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    setNewClient({ ...newClient, redirectUri: e.target.value })
-                  }
-                />
-                <FieldDescription>
-                  The URL to redirect users after authorization
-                </FieldDescription>
-              </Field>
-            </FieldGroup>
-          </CardContent>
-          <CardFooter className="flex gap-3">
-            <Button
-              variant="outline"
-              onClick={() => setShowCreateForm(false)}
-              disabled={isCreating}
-            >
-              Cancel
-            </Button>
+          <FieldGroup className="space-y-4">
+            <Field>
+              <FieldLabel htmlFor="name">Application Name</FieldLabel>
+              <Input
+                id="name"
+                placeholder="My Application"
+                value={newClient.name}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setNewClient({ ...newClient, name: e.target.value })
+                }
+              />
+              <FieldDescription>
+                A friendly name for your application
+              </FieldDescription>
+            </Field>
+
+            <Field>
+              <FieldLabel htmlFor="redirectUri">Redirect URI</FieldLabel>
+              <Input
+                id="redirectUri"
+                placeholder="https://myapp.com/callback"
+                value={newClient.redirectUri}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setNewClient({ ...newClient, redirectUri: e.target.value })
+                }
+              />
+              <FieldDescription>
+                The URL to redirect users after authorization
+              </FieldDescription>
+            </Field>
+          </FieldGroup>
+
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setNewClient({ name: "", redirectUri: "" });
+                }}
+                disabled={isCreating}
+              >
+                Cancel
+              </Button>
+            </DialogClose>
             <Button onClick={createClient} disabled={isCreating}>
-              {isCreating ? "Creating..." : "Create Application"}
+              {isCreating ? (
+                <>
+                  <IconLoader2 className="mr-2 size-4 animate-spin" />
+                  Creating...
+                </>
+              ) : (
+                "Create Application"
+              )}
             </Button>
-          </CardFooter>
-        </Card>
-      ) : (
-        <Button onClick={() => setShowCreateForm(true)} className="gap-2">
-          <IconPlus className="size-4" />
-          Create OAuth Application
-        </Button>
-      )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Client List */}
       {clients.length === 0 ? (
@@ -320,14 +358,46 @@ export function OAuthApplications() {
                         : "Unknown"}
                     </CardDescription>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="icon-sm"
-                    className="text-destructive hover:text-destructive"
-                    onClick={() => deleteClient(client.clientId)}
-                  >
-                    <IconTrash className="size-4" />
-                  </Button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        className="text-destructive hover:text-destructive"
+                        disabled={deletingId === client.clientId}
+                      >
+                        {deletingId === client.clientId ? (
+                          <IconLoader2 className="size-4 animate-spin" />
+                        ) : (
+                          <IconTrash className="size-4" />
+                        )}
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle className="flex items-center gap-2">
+                          <IconAlertTriangle className="size-5 text-destructive" />
+                          Delete OAuth Application?
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                          This action cannot be undone. Any applications using
+                          this client ID will no longer be able to authenticate.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() =>
+                            deleteClient(
+                              client.clientId || client.client_id || "",
+                            )
+                          }
+                        >
+                          Delete Application
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">

@@ -15,12 +15,12 @@ import { phoneNumberClient } from "better-auth/client/plugins";
 export const authClient = createAuthClient({
   baseURL: env.NEXT_PUBLIC_SERVER_URL,
   plugins: [
-    twoFactorClient({
-      onTwoFactorRedirect() {
-        // Redirect to the 2FA verification page when 2FA is required during sign-in
-        window.location.href = "/two-factor";
-      },
-    }),
+    // twoFactorClient({
+    //   onTwoFactorRedirect() {
+    //     // Redirect to the 2FA verification page when 2FA is required during sign-in
+    //     window.location.href = "/two-factor";
+    //   },
+    // }),
     polarClient(),
     passkeyClient(),
     emailOTPClient(),

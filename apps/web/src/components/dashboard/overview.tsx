@@ -9,6 +9,9 @@ import {
   IconKey,
   IconArrowRight,
   IconSparkles,
+  IconCheck,
+  IconAlertTriangle,
+  IconFingerprint,
 } from "@tabler/icons-react";
 import Link from "next/link";
 
@@ -24,6 +27,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { trpc } from "@/utils/trpc";
+import Grainient from "@/components/Grainient";
 
 interface DashboardOverviewProps {
   user: typeof authClient.$Infer.Session.user;
@@ -52,267 +56,286 @@ export function DashboardOverview({
   const isTwoFactorEnabled = (user as any)?.twoFactorEnabled ?? false;
 
   return (
-    <div className="space-y-8">
-      {/* Welcome Section */}
-      <div className="flex flex-col gap-2">
-        <h1 className="text-3xl font-bold tracking-tight">
-          Welcome back, {user.name.split(" ")[0]}!
-        </h1>
-        <p className="text-muted-foreground">
-          Here's an overview of your account security and subscription status.
-        </p>
+    <div className="space-y-6">
+      {/* Hero Section */}
+      <div className="relative overflow-hidden rounded-3xl bg-background border shadow-sm">
+        <div className="absolute inset-0 opacity-20 dark:opacity-30">
+          <Grainient
+            color1="#6366f1"
+            color2="#ec4899"
+            color3="#a855f7"
+            zoom={0.8}
+            className="h-full w-full"
+          />
+        </div>
+        <div className="relative p-8 md:p-10">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div className="space-y-2">
+              <h1 className="text-3xl font-bold tracking-tight md:text-4xl">
+                Welcome back, {user.name.split(" ")[0]}
+              </h1>
+              <p className="text-muted-foreground max-w-lg text-base">
+                Your account is{" "}
+                {isTwoFactorEnabled ? "secure" : "mostly secure"}.
+                {hasProSubscription
+                  ? " You have full access to all premium features."
+                  : " Upgrade to Pro to unlock the full potential of SafeCircle."}
+              </p>
+            </div>
+            <div className="flex gap-3">
+              {!hasProSubscription && (
+                <Button
+                  onClick={async () =>
+                    await authClient.checkout({ slug: "pro" })
+                  }
+                  className="rounded-full shadow-lg shadow-primary/20"
+                  size="lg"
+                >
+                  <IconSparkles className="mr-2 size-4" />
+                  Upgrade to Pro
+                </Button>
+              )}
+              <Link href="/dashboard/settings" as={undefined}>
+                <Button variant="outline" className="rounded-full" size="lg">
+                  Edit Profile
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Subscription Banner */}
-      {!hasProSubscription && (
-        <Card className="border-primary/20 bg-linear-to-r from-primary/5 to-primary/10">
-          <CardContent className="flex items-center justify-between py-6">
-            <div className="flex items-center gap-4">
-              <div className="flex size-12 items-center justify-center rounded-full bg-primary/10">
-                <IconSparkles className="size-6 text-primary" />
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {/* Quick Actions / Status */}
+        <div className="space-y-6 lg:col-span-2">
+          <h2 className="text-lg font-semibold tracking-tight">Overview</h2>
+
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {/* Security Status */}
+            <Card className="relative overflow-hidden transition-all hover:shadow-md">
+              <CardHeader className="pb-2">
+                <CardDescription>Security Status</CardDescription>
+                <CardTitle className="text-2xl">
+                  {isTwoFactorEnabled ? "Protected" : "At Risk"}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center gap-2 mt-2">
+                  {isTwoFactorEnabled ? (
+                    <Badge
+                      variant="default"
+                      className="bg-green-500/15 text-green-700 dark:text-green-400 hover:bg-green-500/25 border-green-500/20"
+                    >
+                      <IconCheck className="mr-1 size-3" /> 2FA Enabled
+                    </Badge>
+                  ) : (
+                    <Badge
+                      variant="destructive"
+                      className="bg-red-500/15 text-red-700 dark:text-red-400 hover:bg-red-500/25 border-red-500/20"
+                    >
+                      <IconAlertTriangle className="mr-1 size-3" /> 2FA Disabled
+                    </Badge>
+                  )}
+                </div>
+              </CardContent>
+              <div className="absolute right-4 top-4 opacity-10">
+                <IconShield className="size-24" />
               </div>
-              <div>
-                <h3 className="font-semibold">Upgrade to Pro</h3>
-                <p className="text-sm text-muted-foreground">
-                  Unlock advanced features and priority support
-                </p>
+            </Card>
+
+            {/* Subscription Status */}
+            <Card className="relative overflow-hidden transition-all hover:shadow-md">
+              <CardHeader className="pb-2">
+                <CardDescription>Current Plan</CardDescription>
+                <CardTitle className="text-2xl">
+                  {hasProSubscription ? "Pro Plan" : "Free Plan"}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center gap-2 mt-2">
+                  {hasProSubscription ? (
+                    <Badge
+                      variant="default"
+                      className="bg-blue-500/15 text-blue-700 dark:text-blue-400 hover:bg-blue-500/25 border-blue-500/20"
+                    >
+                      <IconSparkles className="mr-1 size-3" /> Active
+                    </Badge>
+                  ) : (
+                    <Badge variant="secondary">Basic Features</Badge>
+                  )}
+                </div>
+              </CardContent>
+              <div className="absolute right-4 top-4 opacity-10">
+                <IconCreditCard className="size-24" />
+              </div>
+            </Card>
+
+            {/* Sessions */}
+            <Card className="relative overflow-hidden transition-all hover:shadow-md">
+              <CardHeader className="pb-2">
+                <CardDescription>Active Sessions</CardDescription>
+                <CardTitle className="text-2xl">{activeSessions}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center gap-2 mt-2">
+                  <Badge variant="outline" className="border-primary/20">
+                    <IconDevices className="mr-1 size-3" /> Devices
+                  </Badge>
+                </div>
+              </CardContent>
+              <div className="absolute right-4 top-4 opacity-10">
+                <IconDevices className="size-24" />
+              </div>
+            </Card>
+          </div>
+
+          <h2 className="text-lg font-semibold tracking-tight pt-4">
+            Quick Actions
+          </h2>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Link href="/dashboard/settings/security" className="block group">
+              <div className="flex items-center justify-between p-4 rounded-xl border bg-card text-card-foreground shadow-sm transition-all hover:border-primary/50 hover:shadow-md">
+                <div className="flex items-center gap-4">
+                  <div className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+                    <IconShield className="size-5" />
+                  </div>
+                  <div>
+                    <h3 className="font-medium">Security Settings</h3>
+                    <p className="text-xs text-muted-foreground">
+                      Manage password & 2FA
+                    </p>
+                  </div>
+                </div>
+                <IconArrowRight className="size-4 text-muted-foreground group-hover:text-primary transition-colors" />
+              </div>
+            </Link>
+
+            <Link href="/dashboard/settings/sessions" className="block group">
+              <div className="flex items-center justify-between p-4 rounded-xl border bg-card text-card-foreground shadow-sm transition-all hover:border-primary/50 hover:shadow-md">
+                <div className="flex items-center gap-4">
+                  <div className="flex size-10 items-center justify-center rounded-lg bg-blue-500/10 text-blue-500 group-hover:bg-blue-500 group-hover:text-white transition-colors">
+                    <IconDevices className="size-5" />
+                  </div>
+                  <div>
+                    <h3 className="font-medium">Manage Sessions</h3>
+                    <p className="text-xs text-muted-foreground">
+                      Review active devices
+                    </p>
+                  </div>
+                </div>
+                <IconArrowRight className="size-4 text-muted-foreground group-hover:text-primary transition-colors" />
+              </div>
+            </Link>
+
+            <Link href="/dashboard/settings" className="block group">
+              <div className="flex items-center justify-between p-4 rounded-xl border bg-card text-card-foreground shadow-sm transition-all hover:border-primary/50 hover:shadow-md">
+                <div className="flex items-center gap-4">
+                  <div className="flex size-10 items-center justify-center rounded-lg bg-green-500/10 text-green-500 group-hover:bg-green-500 group-hover:text-white transition-colors">
+                    <IconFingerprint className="size-5" />
+                  </div>
+                  <div>
+                    <h3 className="font-medium">Profile Details</h3>
+                    <p className="text-xs text-muted-foreground">
+                      Update your information
+                    </p>
+                  </div>
+                </div>
+                <IconArrowRight className="size-4 text-muted-foreground group-hover:text-primary transition-colors" />
+              </div>
+            </Link>
+
+            <div
+              className="block group cursor-pointer"
+              onClick={async () => {
+                if (hasProSubscription) await authClient.customer.portal();
+                else await authClient.checkout({ slug: "pro" });
+              }}
+            >
+              <div className="flex items-center justify-between p-4 rounded-xl border bg-card text-card-foreground shadow-sm transition-all hover:border-primary/50 hover:shadow-md">
+                <div className="flex items-center gap-4">
+                  <div className="flex size-10 items-center justify-center rounded-lg bg-purple-500/10 text-purple-500 group-hover:bg-purple-500 group-hover:text-white transition-colors">
+                    <IconCreditCard className="size-5" />
+                  </div>
+                  <div>
+                    <h3 className="font-medium">Billing & Plan</h3>
+                    <p className="text-xs text-muted-foreground">
+                      {hasProSubscription
+                        ? "Manage subscription"
+                        : "Upgrade to Pro"}
+                    </p>
+                  </div>
+                </div>
+                <IconArrowRight className="size-4 text-muted-foreground group-hover:text-primary transition-colors" />
               </div>
             </div>
-            <Button
-              onClick={async () => await authClient.checkout({ slug: "pro" })}
-            >
-              Upgrade Now
-              <IconArrowRight className="ml-2 size-4" />
-            </Button>
-          </CardContent>
-        </Card>
-      )}
+          </div>
+        </div>
 
-      {/* Stats Grid */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {/* Subscription Status */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Plan</CardTitle>
-            <IconCreditCard className="size-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center gap-2">
-              <span className="text-2xl font-bold">
-                {hasProSubscription ? "Pro" : "Free"}
-              </span>
-              {hasProSubscription && <Badge variant="default">Active</Badge>}
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              {hasProSubscription
-                ? "All features unlocked"
-                : "Basic features only"}
-            </p>
-          </CardContent>
-        </Card>
+        {/* Sidebar / Extra Info */}
+        <div className="space-y-6">
+          <h2 className="text-lg font-semibold tracking-tight">
+            Account Details
+          </h2>
+          <Card className="h-fit">
+            <CardHeader>
+              <CardTitle>Your Profile</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center gap-4">
+                <div className="size-12 rounded-full bg-primary/10 flex items-center justify-center text-lg font-bold text-primary">
+                  {user.name.charAt(0).toUpperCase()}
+                </div>
+                <div>
+                  <p className="font-medium">{user.name}</p>
+                  <p className="text-xs text-muted-foreground">{user.email}</p>
+                </div>
+              </div>
 
-        {/* Security Status */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Security</CardTitle>
-            <IconShield className="size-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center gap-2">
-              <span className="text-2xl font-bold">
-                {isTwoFactorEnabled ? "Strong" : "Basic"}
-              </span>
-              <Badge variant={isTwoFactorEnabled ? "default" : "secondary"}>
-                {isTwoFactorEnabled ? "2FA On" : "2FA Off"}
-              </Badge>
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              {isTwoFactorEnabled
-                ? "Two-factor authentication enabled"
-                : "Enable 2FA for better security"}
-            </p>
-          </CardContent>
-        </Card>
-
-        {/* Active Sessions */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Sessions</CardTitle>
-            <IconDevices className="size-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{activeSessions}</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Active device{activeSessions !== 1 ? "s" : ""} logged in
-            </p>
-          </CardContent>
-        </Card>
-
-        {/* Email Verification */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Email</CardTitle>
-            <IconKey className="size-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center gap-2">
-              <span className="text-2xl font-bold">
-                {user.emailVerified ? "Verified" : "Pending"}
-              </span>
-            </div>
-            <p className="text-xs text-muted-foreground mt-1 truncate">
-              {user.email}
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Quick Actions */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <Card>
-          <CardHeader>
-            <CardTitle>Security Settings</CardTitle>
-            <CardDescription>
-              Manage your account security preferences
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-sm">Two-Factor Authentication</span>
-              <Badge variant={isTwoFactorEnabled ? "default" : "outline"}>
-                {isTwoFactorEnabled ? "Enabled" : "Disabled"}
-              </Badge>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm">Password</span>
-              <Badge variant="outline">Set</Badge>
-            </div>
-          </CardContent>
-          <CardFooter>
-            <Link
-              href={"/dashboard/settings/security" as any}
-              className="w-full"
-              prefetch={false}
-            >
-              <Button variant="outline" className="w-full">
-                Manage Security
-                <IconArrowRight className="ml-2 size-4" />
+              <div className="space-y-2 pt-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Joined</span>
+                  <span>{new Date(user.createdAt).toLocaleDateString()}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Status</span>
+                  <Badge variant="secondary" className="h-5 px-1.5 text-[10px]">
+                    Active
+                  </Badge>
+                </div>
+              </div>
+            </CardContent>
+            <CardFooter>
+              <Button
+                variant="ghost"
+                className="w-full justify-start"
+                size="sm"
+                asChild
+              >
+                <Link href="/dashboard/settings">Edit Details</Link>
               </Button>
-            </Link>
-          </CardFooter>
-        </Card>
+            </CardFooter>
+          </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Connected Sessions</CardTitle>
-            <CardDescription>
-              View and manage your active sessions
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">
-              You have {activeSessions} active session
-              {activeSessions !== 1 ? "s" : ""} across your devices.
-            </p>
-          </CardContent>
-          <CardFooter>
-            <Link
-              href={"/dashboard/settings/sessions" as any}
-              className="w-full"
-              prefetch={false}
-            >
-              <Button variant="outline" className="w-full">
-                View Sessions
-                <IconArrowRight className="ml-2 size-4" />
-              </Button>
-            </Link>
-          </CardFooter>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Billing & Subscription</CardTitle>
-            <CardDescription>
-              Manage your subscription and payment methods
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">
-              {hasProSubscription
-                ? "You're on the Pro plan with all features unlocked."
-                : "Upgrade to Pro for advanced features and priority support."}
-            </p>
-          </CardContent>
-          <CardFooter>
-            {hasProSubscription ? (
+          <Card className="bg-primary/5 border-primary/10">
+            <CardHeader>
+              <CardTitle className="text-sm">Need Help?</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-xs text-muted-foreground mb-4">
+                Check out our documentation or contact support if you run into
+                any issues.
+              </p>
               <Button
                 variant="outline"
-                className="w-full"
-                onClick={async () => await authClient.customer.portal()}
+                size="sm"
+                className="w-full bg-background"
               >
-                Manage Subscription
-                <IconArrowRight className="ml-2 size-4" />
+                Documentation
               </Button>
-            ) : (
-              <Button
-                className="w-full"
-                onClick={async () => await authClient.checkout({ slug: "pro" })}
-              >
-                Upgrade to Pro
-                <IconArrowRight className="ml-2 size-4" />
-              </Button>
-            )}
-          </CardFooter>
-        </Card>
+            </CardContent>
+          </Card>
+        </div>
       </div>
-
-      {/* Account Info */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Account Information</CardTitle>
-          <CardDescription>Your account details at a glance</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <div>
-              <dt className="text-sm font-medium text-muted-foreground">
-                Full Name
-              </dt>
-              <dd className="text-sm mt-1">{user.name}</dd>
-            </div>
-            <div>
-              <dt className="text-sm font-medium text-muted-foreground">
-                Email Address
-              </dt>
-              <dd className="text-sm mt-1">{user.email}</dd>
-            </div>
-            <div>
-              <dt className="text-sm font-medium text-muted-foreground">
-                Account Created
-              </dt>
-              <dd className="text-sm mt-1">
-                {new Date(user.createdAt).toLocaleDateString()}
-              </dd>
-            </div>
-            <div>
-              <dt className="text-sm font-medium text-muted-foreground">
-                Account Status
-              </dt>
-              <dd className="text-sm mt-1">
-                <Badge variant="default">Active</Badge>
-              </dd>
-            </div>
-          </dl>
-        </CardContent>
-        <CardFooter>
-          <Link href={"/dashboard/settings" as any} prefetch={false}>
-            <Button variant="outline">
-              Edit Profile
-              <IconArrowRight className="ml-2 size-4" />
-            </Button>
-          </Link>
-        </CardFooter>
-      </Card>
     </div>
   );
 }
