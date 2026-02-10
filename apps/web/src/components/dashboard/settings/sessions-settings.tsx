@@ -36,6 +36,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Separator } from "@/components/ui/separator";
 import Loader from "@/components/loader";
 
 interface Session {
@@ -53,6 +54,7 @@ export function SessionsSettings() {
 
   const [revokingId, setRevokingId] = useState<string | null>(null);
   const [isRevokingAll, setIsRevokingAll] = useState(false);
+  const [showIpAddress, setShowIpAddress] = useState<string | null>(null);
 
   const fetchSessions = async () => {
     setIsLoading(true);
@@ -170,6 +172,15 @@ export function SessionsSettings() {
     });
   };
 
+  const blurIpAddress = (ip?: string | null) => {
+    if (!ip) return "";
+    const parts = ip.split(".");
+    if (parts.length === 4) {
+      return `${parts[0]}.${parts[1]}.***.***.`;
+    }
+    return ip.slice(0, 5) + "***";
+  };
+
   if (isLoading) {
     return <Loader />;
   }
@@ -179,49 +190,86 @@ export function SessionsSettings() {
   );
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Active Sessions</h1>
-        <p className="text-muted-foreground">
+    <div className="space-y-8">
+      {/* Page Header */}
+      <div className="space-y-2">
+        <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
+          Active Sessions
+        </h1>
+        <p className="text-base text-muted-foreground">
           Manage devices where you're currently signed in
         </p>
       </div>
 
-      {/* Current Session */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Current Session</CardTitle>
-          <CardDescription>
-            This is the device you're currently using
-          </CardDescription>
+      {/* Current Session Card */}
+      <Card className="border-border/50 bg-gradient-to-br from-primary/5 via-card/50 to-card/50 backdrop-blur-sm overflow-hidden">
+        <CardHeader className="pb-4">
+          <div className="flex items-center gap-3">
+            <div className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+              <IconCheck className="size-5" />
+            </div>
+            <div>
+              <CardTitle className="text-lg">Current Session</CardTitle>
+              <CardDescription className="text-sm">
+                The device you're using right now
+              </CardDescription>
+            </div>
+          </div>
         </CardHeader>
-        <CardContent>
+        <Separator className="bg-border/30" />
+        <CardContent className="pt-6">
           {currentSession && (
-            <div className="flex items-center gap-4 rounded-lg border border-primary/30 bg-primary/5 p-4">
-              <div className="flex size-12 items-center justify-center rounded-full bg-primary/10">
-                {getDeviceIcon(currentSession.session.userAgent)}
-              </div>
-              <div className="flex-1">
-                <div className="flex items-center gap-2">
-                  <p className="font-medium">
+            <div className="space-y-4">
+              {/* Device Info */}
+              <div className="flex items-start gap-4">
+                <div className="flex size-12 items-center justify-center rounded-lg bg-primary/10 text-primary flex-shrink-0">
+                  {getDeviceIcon(currentSession.session.userAgent)}
+                </div>
+                <div className="flex-1">
+                  <p className="font-semibold text-foreground">
                     {getDeviceName(currentSession.session.userAgent)}
                   </p>
-                  <Badge variant="default" className="gap-1">
+                  <Badge className="mt-2 gap-1 bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/25 border-emerald-500/30">
                     <IconCheck className="size-3" />
                     Current
                   </Badge>
                 </div>
-                <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1 text-sm text-muted-foreground">
-                  {currentSession.session.ipAddress && (
-                    <span className="flex items-center gap-1">
-                      <IconMapPin className="size-3" />
-                      {currentSession.session.ipAddress}
-                    </span>
-                  )}
-                  <span className="flex items-center gap-1">
-                    <IconClock className="size-3" />
-                    Started {formatDate(currentSession.session.createdAt)}
-                  </span>
+              </div>
+
+              <Separator className="bg-border/30" />
+
+              {/* Session Details */}
+              <div className="grid gap-4 sm:grid-cols-2">
+                {/* IP Address */}
+                <div className="space-y-2">
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-2">
+                    <IconMapPin className="size-3.5 text-primary" />
+                    IP Address
+                  </p>
+                  <div
+                    className="text-sm text-foreground cursor-default"
+                    onMouseEnter={() =>
+                      setShowIpAddress(currentSession.session.ipAddress || null)
+                    }
+                    onMouseLeave={() => setShowIpAddress(null)}
+                    title={currentSession.session.ipAddress || "Unknown"}
+                  >
+                    {showIpAddress === currentSession.session.ipAddress
+                      ? currentSession.session.ipAddress || "Unknown"
+                      : blurIpAddress(currentSession.session.ipAddress) ||
+                        "Unknown"}
+                  </div>
+                </div>
+
+                {/* Started */}
+                <div className="space-y-2">
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-2">
+                    <IconClock className="size-3.5 text-primary" />
+                    Started
+                  </p>
+                  <p className="text-sm text-foreground">
+                    {formatDate(currentSession.session.createdAt)}
+                  </p>
                 </div>
               </div>
             </div>
@@ -229,20 +277,29 @@ export function SessionsSettings() {
         </CardContent>
       </Card>
 
-      {/* Other Sessions */}
-      <Card>
-        <CardHeader>
+      {/* Other Sessions Card */}
+      <Card className="border-border/50 bg-card/50 backdrop-blur-sm overflow-hidden">
+        <CardHeader className="pb-4">
           <div className="flex items-center justify-between">
-            <div>
-              <CardTitle>Other Sessions</CardTitle>
-              <CardDescription>
-                Sessions active on other devices
-              </CardDescription>
+            <div className="flex items-center gap-3">
+              <div className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                <IconDeviceDesktop className="size-5" />
+              </div>
+              <div>
+                <CardTitle className="text-lg">Other Sessions</CardTitle>
+                <CardDescription className="text-sm">
+                  Sessions active on other devices
+                </CardDescription>
+              </div>
             </div>
             {otherSessions && otherSessions.length > 0 && (
               <AlertDialog>
                 <AlertDialogTrigger asChild>
-                  <Button variant="destructive" size="sm">
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    className="rounded-lg"
+                  >
                     Revoke All
                   </Button>
                 </AlertDialogTrigger>
@@ -271,11 +328,14 @@ export function SessionsSettings() {
             )}
           </div>
         </CardHeader>
-        <CardContent>
+        <Separator className="bg-border/30" />
+        <CardContent className="pt-6">
           {!otherSessions || otherSessions.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-8 text-center">
               <IconDeviceDesktop className="size-12 text-muted-foreground/50 mb-4" />
-              <p className="text-muted-foreground">No other active sessions</p>
+              <p className="text-muted-foreground font-medium">
+                No other active sessions
+              </p>
               <p className="text-sm text-muted-foreground">
                 You're only signed in on this device
               </p>
@@ -285,21 +345,32 @@ export function SessionsSettings() {
               {otherSessions.map((session: Session) => (
                 <div
                   key={session.token}
-                  className="flex items-center justify-between rounded-lg border p-4"
+                  className="flex items-center justify-between rounded-lg border border-border/50 bg-card/30 p-4 hover:bg-card/50 transition-colors"
                 >
-                  <div className="flex items-center gap-4">
-                    <div className="flex size-10 items-center justify-center rounded-full bg-muted">
+                  <div className="flex items-center gap-4 flex-1 min-w-0">
+                    <div className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary flex-shrink-0">
                       {getDeviceIcon(session.userAgent)}
                     </div>
-                    <div>
-                      <p className="font-medium">
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-foreground">
                         {getDeviceName(session.userAgent)}
                       </p>
-                      <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1 text-sm text-muted-foreground">
+                      <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1 text-xs text-muted-foreground">
                         {session.ipAddress && (
                           <span className="flex items-center gap-1">
                             <IconMapPin className="size-3" />
-                            {session.ipAddress}
+                            <span
+                              onMouseEnter={() =>
+                                setShowIpAddress(session.ipAddress)
+                              }
+                              onMouseLeave={() => setShowIpAddress(null)}
+                              title={session.ipAddress}
+                              className="cursor-default"
+                            >
+                              {showIpAddress === session.ipAddress
+                                ? session.ipAddress
+                                : blurIpAddress(session.ipAddress)}
+                            </span>
                           </span>
                         )}
                         <span className="flex items-center gap-1">
@@ -314,7 +385,7 @@ export function SessionsSettings() {
                       <Button
                         variant="ghost"
                         size="icon-sm"
-                        className="text-destructive hover:text-destructive"
+                        className="text-destructive hover:text-destructive flex-shrink-0 ml-2"
                         disabled={revokingId === session.token}
                       >
                         {revokingId === session.token ? (
@@ -353,29 +424,41 @@ export function SessionsSettings() {
         </CardContent>
       </Card>
 
-      {/* Session Info */}
-      <Card>
-        <CardHeader>
-          <CardTitle>About Sessions</CardTitle>
+      {/* Session Info Card */}
+      <Card className="border-border/50 bg-card/50 backdrop-blur-sm overflow-hidden">
+        <CardHeader className="pb-4">
+          <CardTitle className="text-lg">About Sessions</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <Separator className="bg-border/30" />
+        <CardContent className="pt-6 space-y-4">
           <p className="text-sm text-muted-foreground">
             A session is created every time you sign in to your account on a new
             device or browser. Sessions help keep you signed in and allow us to
             show you which devices have access to your account.
           </p>
-          <div className="rounded-lg border p-4 bg-muted/50">
-            <p className="text-sm font-medium mb-2">Security Tips</p>
-            <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
-              <li>
-                Regularly review your active sessions and revoke any you don't
-                recognize
+          <div className="rounded-lg border border-primary/20 bg-primary/5 p-4 space-y-3">
+            <p className="text-sm font-semibold text-foreground">
+              🔒 Security Tips
+            </p>
+            <ul className="text-sm text-muted-foreground space-y-2">
+              <li className="flex gap-2">
+                <span className="text-primary">•</span>
+                <span>
+                  Regularly review your active sessions and revoke any you don't
+                  recognize
+                </span>
               </li>
-              <li>
-                If you see a session from an unfamiliar location, change your
-                password immediately
+              <li className="flex gap-2">
+                <span className="text-primary">•</span>
+                <span>
+                  If you see a session from an unfamiliar location, change your
+                  password immediately
+                </span>
               </li>
-              <li>Sign out from shared or public devices after use</li>
+              <li className="flex gap-2">
+                <span className="text-primary">•</span>
+                <span>Sign out from shared or public devices after use</span>
+              </li>
             </ul>
           </div>
         </CardContent>

@@ -16,7 +16,6 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -25,7 +24,6 @@ import {
   Field,
   FieldDescription,
   FieldError,
-  FieldGroup,
   FieldLabel,
 } from "@/components/ui/field";
 import { Badge } from "@/components/ui/badge";
@@ -50,6 +48,9 @@ export function SecuritySettings() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [passwordError, setPasswordError] = useState("");
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const [isRevokingAllSessions, setIsRevokingAllSessions] = useState(false);
   const isTwoFactorEnabled = (session?.user as any)?.twoFactorEnabled ?? false;
@@ -113,74 +114,95 @@ export function SecuritySettings() {
   };
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Security Settings</h1>
-        <p className="text-muted-foreground">
+    <div className="space-y-8">
+      {/* Page Header */}
+      <div className="space-y-2">
+        <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
+          Security Settings
+        </h1>
+        <p className="text-base text-muted-foreground">
           Manage your account security and authentication methods
         </p>
       </div>
 
       {/* Security Overview */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <IconShield className="size-5" />
-            Security Overview
-          </CardTitle>
-          <CardDescription>
-            A summary of your account security status
-          </CardDescription>
+      <Card className="border-border/50 bg-gradient-to-br from-primary/5 via-card/50 to-card/50 backdrop-blur-sm overflow-hidden">
+        <CardHeader className="pb-4">
+          <div className="flex items-center gap-3">
+            <div className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+              <IconShield className="size-5" />
+            </div>
+            <div>
+              <CardTitle className="text-lg">Security Overview</CardTitle>
+              <CardDescription className="text-sm">
+                A summary of your account security status
+              </CardDescription>
+            </div>
+          </div>
         </CardHeader>
-        <CardContent>
+        <Separator className="bg-border/30" />
+        <CardContent className="pt-6">
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <div className="flex items-center justify-between rounded-lg border p-4">
+            {/* Password Status */}
+            <div className="flex flex-col gap-3 rounded-lg border border-primary/20 bg-primary/5 p-4">
               <div className="flex items-center gap-3">
-                <div className="flex size-10 items-center justify-center rounded-full bg-primary/10">
-                  <IconLock className="size-5 text-primary" />
+                <div className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                  <IconLock className="size-5" />
                 </div>
-                <div>
-                  <p className="font-medium">Password</p>
+                <div className="flex-1">
+                  <p className="text-sm font-semibold">Password</p>
                   <p className="text-xs text-muted-foreground">Set</p>
                 </div>
               </div>
-              <Badge variant="default">
-                <IconCheck className="mr-1 size-3" />
+              <Badge className="w-fit gap-1 bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/25 border-emerald-500/30">
+                <IconCheck className="size-3" />
                 Secure
               </Badge>
             </div>
 
-            <div className="flex items-center justify-between rounded-lg border p-4">
+            {/* Two-Factor Auth Status */}
+            <div className="flex flex-col gap-3 rounded-lg border border-primary/20 bg-primary/5 p-4">
               <div className="flex items-center gap-3">
-                <div className="flex size-10 items-center justify-center rounded-full bg-primary/10">
-                  <IconShield className="size-5 text-primary" />
+                <div className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                  <IconShield className="size-5" />
                 </div>
-                <div>
-                  <p className="font-medium">Two-Factor Auth</p>
+                <div className="flex-1">
+                  <p className="text-sm font-semibold">Two-Factor Auth</p>
                   <p className="text-xs text-muted-foreground">
                     {isTwoFactorEnabled ? "Enabled" : "Disabled"}
                   </p>
                 </div>
               </div>
-              <Badge variant={isTwoFactorEnabled ? "default" : "secondary"}>
+              <Badge
+                className={`w-fit gap-1 ${
+                  isTwoFactorEnabled
+                    ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/25 border-emerald-500/30"
+                    : "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30"
+                }`}
+              >
                 {isTwoFactorEnabled ? "On" : "Off"}
               </Badge>
             </div>
 
-            <div className="flex items-center justify-between rounded-lg border p-4">
+            {/* Email Verified Status */}
+            <div className="flex flex-col gap-3 rounded-lg border border-primary/20 bg-primary/5 p-4">
               <div className="flex items-center gap-3">
-                <div className="flex size-10 items-center justify-center rounded-full bg-primary/10">
-                  <IconCheck className="size-5 text-primary" />
+                <div className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                  <IconCheck className="size-5" />
                 </div>
-                <div>
-                  <p className="font-medium">Email Verified</p>
+                <div className="flex-1">
+                  <p className="text-sm font-semibold">Email Verified</p>
                   <p className="text-xs text-muted-foreground">
                     {session?.user.emailVerified ? "Yes" : "No"}
                   </p>
                 </div>
               </div>
               <Badge
-                variant={session?.user.emailVerified ? "default" : "secondary"}
+                className={`w-fit gap-1 ${
+                  session?.user.emailVerified
+                    ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/25 border-emerald-500/30"
+                    : "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30"
+                }`}
               >
                 {session?.user.emailVerified ? "Verified" : "Pending"}
               </Badge>
@@ -190,91 +212,141 @@ export function SecuritySettings() {
       </Card>
 
       {/* Change Password */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Change Password</CardTitle>
-          <CardDescription>
-            Update your password to keep your account secure
-          </CardDescription>
+      <Card className="border-border/50 bg-card/50 backdrop-blur-sm overflow-hidden">
+        <CardHeader className="pb-4">
+          <div className="flex items-center gap-3">
+            <div className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+              <IconLock className="size-5" />
+            </div>
+            <div>
+              <CardTitle className="text-lg">Change Password</CardTitle>
+              <CardDescription className="text-sm">
+                Update your password to keep your account secure
+              </CardDescription>
+            </div>
+          </div>
         </CardHeader>
-        <CardContent>
-          <FieldGroup className="space-y-4">
-            <Field>
-              <FieldLabel htmlFor="currentPassword">
-                Current Password
-              </FieldLabel>
-              <Input
-                id="currentPassword"
-                type="password"
-                placeholder="Enter your current password"
-                value={currentPassword}
-                onChange={(e) => setCurrentPassword(e.target.value)}
-              />
-            </Field>
+        <Separator className="bg-border/30" />
+        <CardContent className="pt-6 space-y-6">
+          {/* Current Password */}
+          <Field className="space-y-3">
+            <FieldLabel
+              htmlFor="currentPassword"
+              className="text-sm font-semibold"
+            >
+              Current Password
+            </FieldLabel>
+            <Input
+              id="currentPassword"
+              type={showCurrentPassword ? "text" : "password"}
+              placeholder="Enter your current password"
+              value={currentPassword}
+              onChange={(e) => setCurrentPassword(e.target.value)}
+              className="rounded-lg bg-input/50 border-border/50 focus:border-primary/50"
+            />
+          </Field>
 
-            <Field>
-              <FieldLabel htmlFor="newPassword">New Password</FieldLabel>
-              <Input
-                id="newPassword"
-                type="password"
-                placeholder="Enter your new password"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-              />
-              <FieldDescription>
-                Password must be at least 8 characters long
-              </FieldDescription>
-            </Field>
+          {/* New Password */}
+          <Field className="space-y-3">
+            <FieldLabel htmlFor="newPassword" className="text-sm font-semibold">
+              New Password
+            </FieldLabel>
+            <Input
+              id="newPassword"
+              type={showNewPassword ? "text" : "password"}
+              placeholder="Enter your new password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              className="rounded-lg bg-input/50 border-border/50 focus:border-primary/50"
+            />
+            <FieldDescription className="text-xs">
+              Password must be at least 8 characters long
+            </FieldDescription>
+          </Field>
 
-            <Field>
-              <FieldLabel htmlFor="confirmPassword">
-                Confirm New Password
-              </FieldLabel>
-              <Input
-                id="confirmPassword"
-                type="password"
-                placeholder="Confirm your new password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-              />
-            </Field>
+          {/* Confirm Password */}
+          <Field className="space-y-3">
+            <FieldLabel
+              htmlFor="confirmPassword"
+              className="text-sm font-semibold"
+            >
+              Confirm New Password
+            </FieldLabel>
+            <Input
+              id="confirmPassword"
+              type={showConfirmPassword ? "text" : "password"}
+              placeholder="Confirm your new password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              className="rounded-lg bg-input/50 border-border/50 focus:border-primary/50"
+            />
+          </Field>
 
-            {passwordError && <FieldError>{passwordError}</FieldError>}
-          </FieldGroup>
+          {/* Error Message */}
+          {passwordError && (
+            <FieldError className="text-sm bg-destructive/10 border border-destructive/30 rounded-lg p-3">
+              {passwordError}
+            </FieldError>
+          )}
         </CardContent>
-        <CardFooter className="border-t pt-6">
-          <Button onClick={handleChangePassword} disabled={isChangingPassword}>
+        <Separator className="bg-border/30" />
+        <div className="px-6 py-4 bg-card/30 flex flex-col sm:flex-row gap-3 justify-end items-center">
+          <p className="text-xs text-muted-foreground hidden sm:block">
+            This will revoke all other sessions for security
+          </p>
+          <Button
+            onClick={handleChangePassword}
+            disabled={isChangingPassword}
+            className="w-full sm:w-auto rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all"
+          >
             {isChangingPassword ? (
               <>
                 <IconLoader2 className="mr-2 size-4 animate-spin" />
                 Changing Password...
               </>
             ) : (
-              "Change Password"
+              <>
+                <IconCheck className="mr-2 size-4" />
+                Change Password
+              </>
             )}
           </Button>
-        </CardFooter>
+        </div>
       </Card>
 
       {/* Session Security */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Session Security</CardTitle>
-          <CardDescription>
-            Manage your active sessions and sign out from other devices
-          </CardDescription>
+      <Card className="border-border/50 bg-card/50 backdrop-blur-sm overflow-hidden">
+        <CardHeader className="pb-4">
+          <div className="flex items-center gap-3">
+            <div className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+              <IconShield className="size-5" />
+            </div>
+            <div>
+              <CardTitle className="text-lg">Session Security</CardTitle>
+              <CardDescription className="text-sm">
+                Manage your active sessions and sign out from other devices
+              </CardDescription>
+            </div>
+          </div>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <Separator className="bg-border/30" />
+        <CardContent className="pt-6">
           <p className="text-sm text-muted-foreground">
             If you suspect unauthorized access to your account, you can sign out
             from all other devices. This will require you to sign in again on
             those devices.
           </p>
         </CardContent>
-        <CardFooter className="border-t pt-6">
+        <Separator className="bg-border/30" />
+        <div className="px-6 py-4 bg-card/30 flex flex-col sm:flex-row gap-3 justify-end items-center">
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <Button variant="destructive">Sign Out All Other Sessions</Button>
+              <Button
+                variant="destructive"
+                className="w-full sm:w-auto rounded-lg"
+              >
+                Sign Out All Other Sessions
+              </Button>
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
@@ -298,28 +370,42 @@ export function SecuritySettings() {
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
-        </CardFooter>
+        </div>
       </Card>
 
       {/* Danger Zone */}
-      <Card className="border-destructive/50">
-        <CardHeader>
-          <CardTitle className="text-destructive">Danger Zone</CardTitle>
-          <CardDescription>
-            Irreversible actions that affect your account
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-between rounded-lg border border-destructive/30 p-4">
+      <Card className="border-destructive/50 bg-gradient-to-br from-destructive/5 via-card/50 to-card/50 backdrop-blur-sm overflow-hidden">
+        <CardHeader className="pb-4">
+          <div className="flex items-center gap-3">
+            <div className="flex size-10 items-center justify-center rounded-lg bg-destructive/10 text-destructive">
+              <IconAlertTriangle className="size-5" />
+            </div>
             <div>
-              <p className="font-medium">Delete Account</p>
-              <p className="text-sm text-muted-foreground">
+              <CardTitle className="text-lg text-destructive">
+                Danger Zone
+              </CardTitle>
+              <CardDescription className="text-sm">
+                Irreversible actions that affect your account
+              </CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <Separator className="bg-destructive/30" />
+        <CardContent className="pt-6">
+          <div className="flex items-center justify-between rounded-lg border border-destructive/30 bg-destructive/5 p-4">
+            <div>
+              <p className="font-semibold text-destructive">Delete Account</p>
+              <p className="text-sm text-muted-foreground mt-1">
                 Permanently delete your account and all associated data
               </p>
             </div>
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button variant="destructive" size="sm">
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  className="rounded-lg flex-shrink-0"
+                >
                   Delete Account
                 </Button>
               </AlertDialogTrigger>

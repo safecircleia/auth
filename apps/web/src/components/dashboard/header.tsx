@@ -12,7 +12,7 @@ import Link from "next/link";
 import React from "react";
 
 import { Button } from "@/components/ui/button";
-import { SidebarTrigger } from "@/components/ui/sidebar";
+import { SidebarTrigger } from "@/components/animate-ui/components/radix/sidebar";
 import { authClient } from "@/lib/auth-client";
 import { Separator } from "@/components/ui/separator";
 
@@ -36,7 +36,7 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
   });
 
   return (
-    <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
+    <header className="flex h-16 shrink-0 items-center gap-2 border-b border-border/50 px-4 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 bg-card/30 backdrop-blur-sm">
       <div className="flex items-center gap-2 px-4">
         <SidebarTrigger className="-ml-1">
           <IconMenu2 className="size-4" />
@@ -54,7 +54,7 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
                 <span className="text-foreground">{item.title}</span>
               ) : (
                 <Link
-                  href={item.href}
+                  href={item.href as any}
                   className="hover:text-foreground transition-colors"
                 >
                   {item.title}
@@ -71,7 +71,7 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
         variant="ghost"
         size="icon"
         onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-        className="mr-2"
+        className="mr-2 hover:bg-primary/10 hover:text-primary"
       >
         <IconSun className="size-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
         <IconMoon className="absolute size-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />

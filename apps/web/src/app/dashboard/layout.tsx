@@ -2,7 +2,10 @@ import { redirect } from "next/navigation";
 
 import { authServerClient } from "@/lib/auth-server";
 import { DashboardSidebar } from "@/components/dashboard/sidebar";
-import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
+import {
+  SidebarProvider,
+  SidebarInset,
+} from "@/components/animate-ui/components/radix/sidebar";
 import { DashboardHeader } from "@/components/dashboard/header";
 
 export default async function DashboardLayout({
@@ -21,7 +24,9 @@ export default async function DashboardLayout({
       <DashboardSidebar user={session.user} />
       <SidebarInset>
         <DashboardHeader user={session.user} />
-        <main className="flex-1 overflow-auto p-6">{children}</main>
+        <main className="flex-1 overflow-auto p-6 bg-background">
+          {children}
+        </main>
       </SidebarInset>
     </SidebarProvider>
   );

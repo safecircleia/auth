@@ -6,7 +6,7 @@ import { CloudflareStateStore } from "alchemy/state";
 // import { GitHubComment } from "alchemy/github";
 import { config } from "dotenv";
 
-const stage = process.env.ALCHEMY_STAGE || "prod";
+const stage = process.env.ALCHEMY_STAGE || "dev";
 
 if (stage === "prod") {
   config({ path: "./.env.production" });

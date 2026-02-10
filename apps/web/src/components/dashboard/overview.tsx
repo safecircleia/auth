@@ -58,12 +58,12 @@ export function DashboardOverview({
   return (
     <div className="space-y-6">
       {/* Hero Section */}
-      <div className="relative overflow-hidden rounded-3xl bg-background border shadow-sm">
-        <div className="absolute inset-0 opacity-20 dark:opacity-30">
+      <div className="relative overflow-hidden rounded-2xl bg-card border border-border/50 shadow-lg">
+        <div className="absolute inset-0 opacity-10 dark:opacity-20">
           <Grainient
-            color1="#6366f1"
-            color2="#ec4899"
-            color3="#a855f7"
+            color1="#8b5cf6"
+            color2="#6366f1"
+            color3="#3b82f6"
             zoom={0.8}
             className="h-full w-full"
           />
@@ -71,7 +71,7 @@ export function DashboardOverview({
         <div className="relative p-8 md:p-10">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div className="space-y-2">
-              <h1 className="text-3xl font-bold tracking-tight md:text-4xl">
+              <h1 className="text-3xl font-bold tracking-tight md:text-4xl bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">
                 Welcome back, {user.name.split(" ")[0]}
               </h1>
               <p className="text-muted-foreground max-w-lg text-base">
@@ -88,7 +88,7 @@ export function DashboardOverview({
                   onClick={async () =>
                     await authClient.checkout({ slug: "pro" })
                   }
-                  className="rounded-full shadow-lg shadow-primary/20"
+                  className="rounded-full shadow-lg shadow-primary/30 hover:shadow-primary/40 transition-shadow"
                   size="lg"
                 >
                   <IconSparkles className="mr-2 size-4" />
@@ -96,7 +96,11 @@ export function DashboardOverview({
                 </Button>
               )}
               <Link href="/dashboard/settings" as={undefined}>
-                <Button variant="outline" className="rounded-full" size="lg">
+                <Button
+                  variant="outline"
+                  className="rounded-full border-border/50 hover:border-border"
+                  size="lg"
+                >
                   Edit Profile
                 </Button>
               </Link>
@@ -112,7 +116,7 @@ export function DashboardOverview({
 
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {/* Security Status */}
-            <Card className="relative overflow-hidden transition-all hover:shadow-md">
+            <Card className="relative overflow-hidden border-border/50 bg-card/50 backdrop-blur-sm transition-all hover:shadow-lg hover:shadow-primary/5 hover:border-border">
               <CardHeader className="pb-2">
                 <CardDescription>Security Status</CardDescription>
                 <CardTitle className="text-2xl">
@@ -124,27 +128,27 @@ export function DashboardOverview({
                   {isTwoFactorEnabled ? (
                     <Badge
                       variant="default"
-                      className="bg-green-500/15 text-green-700 dark:text-green-400 hover:bg-green-500/25 border-green-500/20"
+                      className="bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/25 border-emerald-500/30"
                     >
                       <IconCheck className="mr-1 size-3" /> 2FA Enabled
                     </Badge>
                   ) : (
                     <Badge
                       variant="destructive"
-                      className="bg-red-500/15 text-red-700 dark:text-red-400 hover:bg-red-500/25 border-red-500/20"
+                      className="bg-red-500/15 text-red-600 dark:text-red-400 hover:bg-red-500/25 border-red-500/30"
                     >
                       <IconAlertTriangle className="mr-1 size-3" /> 2FA Disabled
                     </Badge>
                   )}
                 </div>
               </CardContent>
-              <div className="absolute right-4 top-4 opacity-10">
+              <div className="absolute right-4 top-4 opacity-5 dark:opacity-10">
                 <IconShield className="size-24" />
               </div>
             </Card>
 
             {/* Subscription Status */}
-            <Card className="relative overflow-hidden transition-all hover:shadow-md">
+            <Card className="relative overflow-hidden border-border/50 bg-card/50 backdrop-blur-sm transition-all hover:shadow-lg hover:shadow-primary/5 hover:border-border">
               <CardHeader className="pb-2">
                 <CardDescription>Current Plan</CardDescription>
                 <CardTitle className="text-2xl">
@@ -156,34 +160,39 @@ export function DashboardOverview({
                   {hasProSubscription ? (
                     <Badge
                       variant="default"
-                      className="bg-blue-500/15 text-blue-700 dark:text-blue-400 hover:bg-blue-500/25 border-blue-500/20"
+                      className="bg-violet-500/15 text-violet-600 dark:text-violet-400 hover:bg-violet-500/25 border-violet-500/30"
                     >
                       <IconSparkles className="mr-1 size-3" /> Active
                     </Badge>
                   ) : (
-                    <Badge variant="secondary">Basic Features</Badge>
+                    <Badge variant="secondary" className="border-border/50">
+                      Basic Features
+                    </Badge>
                   )}
                 </div>
               </CardContent>
-              <div className="absolute right-4 top-4 opacity-10">
+              <div className="absolute right-4 top-4 opacity-5 dark:opacity-10">
                 <IconCreditCard className="size-24" />
               </div>
             </Card>
 
             {/* Sessions */}
-            <Card className="relative overflow-hidden transition-all hover:shadow-md">
+            <Card className="relative overflow-hidden border-border/50 bg-card/50 backdrop-blur-sm transition-all hover:shadow-lg hover:shadow-primary/5 hover:border-border">
               <CardHeader className="pb-2">
                 <CardDescription>Active Sessions</CardDescription>
                 <CardTitle className="text-2xl">{activeSessions}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex items-center gap-2 mt-2">
-                  <Badge variant="outline" className="border-primary/20">
+                  <Badge
+                    variant="outline"
+                    className="border-primary/30 bg-primary/5"
+                  >
                     <IconDevices className="mr-1 size-3" /> Devices
                   </Badge>
                 </div>
               </CardContent>
-              <div className="absolute right-4 top-4 opacity-10">
+              <div className="absolute right-4 top-4 opacity-5 dark:opacity-10">
                 <IconDevices className="size-24" />
               </div>
             </Card>
@@ -194,9 +203,9 @@ export function DashboardOverview({
           </h2>
           <div className="grid gap-4 sm:grid-cols-2">
             <Link href="/dashboard/settings/security" className="block group">
-              <div className="flex items-center justify-between p-4 rounded-xl border bg-card text-card-foreground shadow-sm transition-all hover:border-primary/50 hover:shadow-md">
+              <div className="flex items-center justify-between p-4 rounded-xl border border-border/50 bg-card/50 backdrop-blur-sm shadow-sm transition-all hover:border-primary/50 hover:shadow-lg hover:shadow-primary/5 hover:bg-card">
                 <div className="flex items-center gap-4">
-                  <div className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+                  <div className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-200">
                     <IconShield className="size-5" />
                   </div>
                   <div>
@@ -211,9 +220,9 @@ export function DashboardOverview({
             </Link>
 
             <Link href="/dashboard/settings/sessions" className="block group">
-              <div className="flex items-center justify-between p-4 rounded-xl border bg-card text-card-foreground shadow-sm transition-all hover:border-primary/50 hover:shadow-md">
+              <div className="flex items-center justify-between p-4 rounded-xl border border-border/50 bg-card/50 backdrop-blur-sm shadow-sm transition-all hover:border-primary/50 hover:shadow-lg hover:shadow-primary/5 hover:bg-card">
                 <div className="flex items-center gap-4">
-                  <div className="flex size-10 items-center justify-center rounded-lg bg-blue-500/10 text-blue-500 group-hover:bg-blue-500 group-hover:text-white transition-colors">
+                  <div className="flex size-10 items-center justify-center rounded-lg bg-blue-500/10 text-blue-500 dark:text-blue-400 group-hover:bg-blue-500 group-hover:text-white transition-all duration-200">
                     <IconDevices className="size-5" />
                   </div>
                   <div>
@@ -228,9 +237,9 @@ export function DashboardOverview({
             </Link>
 
             <Link href="/dashboard/settings" className="block group">
-              <div className="flex items-center justify-between p-4 rounded-xl border bg-card text-card-foreground shadow-sm transition-all hover:border-primary/50 hover:shadow-md">
+              <div className="flex items-center justify-between p-4 rounded-xl border border-border/50 bg-card/50 backdrop-blur-sm shadow-sm transition-all hover:border-primary/50 hover:shadow-lg hover:shadow-primary/5 hover:bg-card">
                 <div className="flex items-center gap-4">
-                  <div className="flex size-10 items-center justify-center rounded-lg bg-green-500/10 text-green-500 group-hover:bg-green-500 group-hover:text-white transition-colors">
+                  <div className="flex size-10 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-500 dark:text-emerald-400 group-hover:bg-emerald-500 group-hover:text-white transition-all duration-200">
                     <IconFingerprint className="size-5" />
                   </div>
                   <div>
@@ -251,9 +260,9 @@ export function DashboardOverview({
                 else await authClient.checkout({ slug: "pro" });
               }}
             >
-              <div className="flex items-center justify-between p-4 rounded-xl border bg-card text-card-foreground shadow-sm transition-all hover:border-primary/50 hover:shadow-md">
+              <div className="flex items-center justify-between p-4 rounded-xl border border-border/50 bg-card/50 backdrop-blur-sm shadow-sm transition-all hover:border-primary/50 hover:shadow-lg hover:shadow-primary/5 hover:bg-card">
                 <div className="flex items-center gap-4">
-                  <div className="flex size-10 items-center justify-center rounded-lg bg-purple-500/10 text-purple-500 group-hover:bg-purple-500 group-hover:text-white transition-colors">
+                  <div className="flex size-10 items-center justify-center rounded-lg bg-violet-500/10 text-violet-500 dark:text-violet-400 group-hover:bg-violet-500 group-hover:text-white transition-all duration-200">
                     <IconCreditCard className="size-5" />
                   </div>
                   <div>
@@ -276,13 +285,13 @@ export function DashboardOverview({
           <h2 className="text-lg font-semibold tracking-tight">
             Account Details
           </h2>
-          <Card className="h-fit">
+          <Card className="h-fit border-border/50 bg-card/50 backdrop-blur-sm">
             <CardHeader>
               <CardTitle>Your Profile</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center gap-4">
-                <div className="size-12 rounded-full bg-primary/10 flex items-center justify-center text-lg font-bold text-primary">
+                <div className="size-12 rounded-full bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center text-lg font-bold text-primary ring-2 ring-primary/20">
                   {user.name.charAt(0).toUpperCase()}
                 </div>
                 <div>
@@ -298,7 +307,10 @@ export function DashboardOverview({
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Status</span>
-                  <Badge variant="secondary" className="h-5 px-1.5 text-[10px]">
+                  <Badge
+                    variant="secondary"
+                    className="h-5 px-1.5 text-[10px] border-border/50"
+                  >
                     Active
                   </Badge>
                 </div>
@@ -307,7 +319,7 @@ export function DashboardOverview({
             <CardFooter>
               <Button
                 variant="ghost"
-                className="w-full justify-start"
+                className="w-full justify-start hover:bg-primary/10 hover:text-primary"
                 size="sm"
                 asChild
               >
@@ -316,7 +328,7 @@ export function DashboardOverview({
             </CardFooter>
           </Card>
 
-          <Card className="bg-primary/5 border-primary/10">
+          <Card className="bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border-primary/20 backdrop-blur-sm">
             <CardHeader>
               <CardTitle className="text-sm">Need Help?</CardTitle>
             </CardHeader>
@@ -328,7 +340,7 @@ export function DashboardOverview({
               <Button
                 variant="outline"
                 size="sm"
-                className="w-full bg-background"
+                className="w-full bg-background/80 backdrop-blur-sm border-border/50 hover:bg-background hover:border-border"
               >
                 Documentation
               </Button>

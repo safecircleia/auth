@@ -427,29 +427,17 @@ export function ApiKeysSettings() {
         <CardHeader>
           <CardTitle>Using API Keys</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent>
           <p className="text-sm text-muted-foreground">
-            Include your API key in the <code>Authorization</code> header when
-            making API requests:
+            <a
+              href="https://sc-docs.tresillo.workers.dev/docs/development"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary hover:underline"
+            >
+              Learn more →
+            </a>
           </p>
-          <div className="rounded-lg bg-muted p-4">
-            <code className="text-sm">
-              Authorization: Bearer your_api_key_here
-            </code>
-          </div>
-          <div className="rounded-lg border p-4 bg-muted/50">
-            <p className="text-sm font-medium mb-2">Security Best Practices</p>
-            <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
-              <li>
-                Never share your API keys or commit them to version control
-              </li>
-              <li>
-                Use environment variables to store API keys in your applications
-              </li>
-              <li>Rotate your keys regularly and delete unused keys</li>
-              <li>Set appropriate expiration dates for your keys</li>
-            </ul>
-          </div>
         </CardContent>
       </Card>
     </div>
